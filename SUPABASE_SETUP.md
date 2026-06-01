@@ -41,7 +41,32 @@ El acceso es **solo por correo y contraseña** (sin Google, por seguridad).
 
 La app envía al usuario a `/auth/callback` al confirmar su correo.
 
+> ⚠️ **¿El enlace del correo te manda a `localhost`?** Es porque el **Site URL**
+> sigue en `http://localhost:3000`. Cámbialo por tu **URL de producción** (la de
+> Vercel) y agrega `https://TU-DOMINIO/auth/callback` a **Redirect URLs**. Los
+> correos que se envíen *después* del cambio ya apuntarán a tu sitio real.
+
+## 3b. Brandear el correo como "Mi Mundial"
+
+1. **Authentication → Email Templates → "Confirm signup"**.
+2. **Subject**: `Confirma tu cuenta en Mi Mundial ⚽`
+3. **Message body**: pega el contenido de
+   `supabase/email-templates/confirm-signup.html` (diseño dorado/oscuro de Mi
+   Mundial con botón “Confirmar mi correo”). Usa la variable `{{ .ConfirmationURL }}`.
+
+### Remitente y entrega (recomendado para producción)
+
+El correo integrado de Supabase tiene **límite bajo** (pocos envíos por hora) y
+sale de un remitente genérico. Para que llegue como **"Mi Mundial"** y sin
+límites, configura **SMTP propio** (gratis con [Resend](https://resend.com)):
+
+- **Project Settings → Authentication → SMTP Settings** → activa *Custom SMTP* y
+  pon los datos de Resend (host, puerto, usuario, API key).
+- **Sender name**: `Mi Mundial` · **Sender email**: el que verifiques en Resend
+  (ej. `no-reply@tudominio.com`).
+
 ## 4. Hacerte administrador
+
 
 Regístrate en la app con tu correo. Luego, en el **SQL Editor**:
 
