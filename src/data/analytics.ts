@@ -80,13 +80,13 @@ export const DEVICE_SPLIT = [
 export const RETENTION = { d1: 54, d7: 31, d30: 18 };
 
 export const RECENT_USERS = [
-  { name: "Regina_07", flag: "mx", picks: 31, when: "hace 2 min", plan: "Google" },
-  { name: "kevoo", flag: "br", picks: 28, when: "hace 6 min", plan: "Google" },
+  { name: "Regina_07", flag: "mx", picks: 31, when: "hace 2 min", plan: "Correo" },
+  { name: "kevoo", flag: "br", picks: 28, when: "hace 6 min", plan: "Correo" },
   { name: "Mariana.G", flag: "co", picks: 31, when: "hace 11 min", plan: "Correo" },
-  { name: "DonPepe", flag: "es", picks: 16, when: "hace 18 min", plan: "Google" },
+  { name: "DonPepe", flag: "es", picks: 16, when: "hace 18 min", plan: "Correo" },
   { name: "tía_lupita", flag: "mx", picks: 31, when: "hace 24 min", plan: "Correo" },
-  { name: "n3ymarista", flag: "br", picks: 22, when: "hace 31 min", plan: "Google" },
-  { name: "la_jefa", flag: "mx", picks: 31, when: "hace 40 min", plan: "Google" },
+  { name: "n3ymarista", flag: "br", picks: 22, when: "hace 31 min", plan: "Correo" },
+  { name: "la_jefa", flag: "mx", picks: 31, when: "hace 40 min", plan: "Correo" },
   { name: "elProfe", flag: "ar", picks: 30, when: "hace 52 min", plan: "Correo" },
 ];
 

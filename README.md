@@ -28,8 +28,8 @@ gana a quién en todo el cuadro y compite en un **ranking global**.
 - **Racha diaria (check-in)**: entra cada día, mantén tu racha 🔥 y gana puntos.
 - **Compartir tu cuadro** como imagen (PNG) para redes.
 - **Ranking** global mock + barras de "popularidad" de cada selección.
-- **Login visual** (`/login`): botón de Google + alta por correo con mensaje de
-  confirmación anti-bots (aún sin conectar).
+- **Login** (`/login`): alta **solo por correo y contraseña** con confirmación
+  de email anti-bots (sin Google, por seguridad).
 - **PWA instalable** (móvil + escritorio): manifest, íconos, service worker con
   soporte offline, página `/offline` y botón "Instalar app".
 - **Panel de Admin** (`/admin`, clave demo `admin`): KPIs (usuarios, DAU, altas,
@@ -54,7 +54,7 @@ gana a quién en todo el cuadro y compite en un **ranking global**.
 
 - **Next.js 16** (App Router, TypeScript)
 - **Tailwind CSS v4**
-- **Supabase** (`@supabase/ssr`): Auth (Google + correo con confirmación),
+- **Supabase** (`@supabase/ssr`): Auth (correo con confirmación, sin Google),
   Postgres con RLS, ligas/ranking/resultados compartidos y métricas de admin.
 - Banderas: SVG empaquetados localmente (`flag-icons`)
 
@@ -100,8 +100,7 @@ src/
 
 ## Próximos pasos sugeridos
 
-1. **Auth real** con Supabase (Google OAuth + email/contraseña con
-   confirmación de correo).
+1. **Auth real** con Supabase (email/contraseña con confirmación de correo).
 2. **Persistencia**: guardar el cuadro y el favorito por usuario.
 3. **Leaderboard real** y puntaje al resolverse partidos reales.
 4. Ideas extra tipo "caliente": rachas diarias, ligas con amigos, logros/medallas,

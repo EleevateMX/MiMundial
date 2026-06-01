@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabase/server";
 
-// Intercambia el código de OAuth / confirmación de correo por una sesión.
+// Intercambia el código de confirmación de correo por una sesión.
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
