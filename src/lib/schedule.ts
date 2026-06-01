@@ -1,45 +1,20 @@
-// Calendario mock de la Ronda de 32: define cuándo "arranca" cada partido.
-// Sirve para la cuenta regresiva y para bloquear los picks antes del pitazo.
+import { KNOCKOUT_KICKOFFS } from "@/data/fixtures";
 
-const MIN = 60 * 1000;
-
-// Minutos respecto al momento de carga. Negativo = ya empezó (bloqueado).
-// Mezclamos partidos cerrados, en juego, por arrancar pronto y a futuro.
-const OFFSETS_MIN = [
-  -180, // 0 cerrado
-  -45, // 1 cerrado / en juego
-  1.5, // 2 arranca en segundos -> tensión
-  8, // 3
-  35, // 4
-  90, // 5
-  60 * 5, // 6
-  60 * 8, // 7
-  60 * 24, // 8 mañana
-  60 * 26,
-  60 * 30,
-  60 * 33,
-  60 * 48, // pasado mañana
-  60 * 50,
-  60 * 54,
-  60 * 56,
-];
-
-export function getKickoffs(base: number): Record<string, number> {
-  const map: Record<string, number> = {};
-  OFFSETS_MIN.forEach((m, i) => {
-    map[`r0-${i}`] = base + m * MIN;
-  });
-  return map;
+// Kickoffs reales de la fase eliminatoria (el cuadro). Mismo formato de siempre:
+// { [matchId]: epochMs }. El parámetro se ignora (fechas absolutas reales).
+export function getKickoffs(_base?: number): Record<string, number> {
+  void _base;
+  return KNOCKOUT_KICKOFFS;
 }
 
 export function isLocked(kickoff: number | undefined, now: number): boolean {
   return kickoff !== undefined && kickoff <= now;
 }
 
-// Bonus por anticipación: a más horas antes del pitazo, más puntos extra.
+// Bonus por anticipación: a más días antes del partido, más puntos extra.
 export function earlyBonus(kickoff: number | undefined, now: number): number {
   if (kickoff === undefined) return 0;
-  const hours = (kickoff - now) / (60 * 60 * 1000);
-  if (hours <= 0) return 0;
-  return Math.max(2, Math.min(25, Math.round(hours)));
+  const days = (kickoff - now) / (24 * 60 * 60 * 1000);
+  if (days <= 0) return 0;
+  return Math.max(2, Math.min(25, Math.round(days)));
 }
