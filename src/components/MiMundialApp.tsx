@@ -8,22 +8,35 @@ import Confetti from "@/components/Confetti";
 import Flag from "@/components/Flag";
 import StreakChip from "@/components/StreakChip";
 import ShareModal from "@/components/ShareModal";
+import RewardToaster from "@/components/RewardToaster";
 import GroupsView from "@/components/views/GroupsView";
 import BracketView from "@/components/views/BracketView";
 import RankingView from "@/components/views/RankingView";
 import LeaguesView from "@/components/views/LeaguesView";
 import DuelView from "@/components/views/DuelView";
 import AchievementsView from "@/components/views/AchievementsView";
+import DailyView from "@/components/views/DailyView";
+import ProfileView from "@/components/views/ProfileView";
 
-type Tab = "grupos" | "cuadro" | "ligas" | "duelo" | "logros" | "ranking";
+type Tab =
+  | "grupos"
+  | "cuadro"
+  | "dia"
+  | "ligas"
+  | "duelo"
+  | "logros"
+  | "ranking"
+  | "perfil";
 
 const TABS: [Tab, string][] = [
   ["grupos", "Grupos"],
   ["cuadro", "Mi Cuadro"],
+  ["dia", "Del día"],
   ["ligas", "Ligas"],
   ["duelo", "Duelo"],
   ["logros", "Logros"],
   ["ranking", "Ranking"],
+  ["perfil", "Perfil"],
 ];
 
 export default function MiMundialApp() {
@@ -31,26 +44,38 @@ export default function MiMundialApp() {
   const [tab, setTab] = useState<Tab>("grupos");
   const [showShare, setShowShare] = useState(false);
 
-  const made = Object.keys(app.state.picks).length;
-
   return (
     <div className="flex flex-col min-h-screen">
       {app.champ && <Confetti />}
+      <RewardToaster
+        unlocked={app.unlocked}
+        level={app.level.level}
+        levelLabel={app.level.label}
+        soundOn={app.state.soundOn}
+      />
 
       {/* ===== Top bar ===== */}
       <header className="sticky top-0 z-40 glass border-b border-white/10">
         <div className="mx-auto max-w-7xl px-4 h-16 flex items-center justify-between gap-3">
           <Logo />
           <div className="flex items-center gap-2 sm:gap-3">
+            <LevelChip level={app.level.level} pct={app.level.pct} />
             <StreakChip
               streakCount={app.state.streakCount}
               checkedInToday={app.checkedInToday}
               onCheckIn={app.checkIn}
             />
-            <ScorePill score={app.totalScore} made={made} bonus={app.streakBonus} />
+            <ScorePill score={app.totalScore} pending={app.pending} />
+            <button
+              onClick={app.toggleSound}
+              title={app.state.soundOn ? "Silenciar" : "Activar sonido"}
+              className="hidden sm:grid place-items-center size-9 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition"
+            >
+              {app.state.soundOn ? "🔊" : "🔇"}
+            </button>
             <button
               onClick={() => setShowShare(true)}
-              title="Compartir mi cuadro"
+              title="Compartir"
               className="hidden sm:grid place-items-center size-9 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition"
             >
               📣
@@ -96,9 +121,20 @@ export default function MiMundialApp() {
             favorite={app.state.favorite}
             kickoffs={app.kickoffs}
             mult={app.state.mult}
+            statuses={app.statuses}
             onPick={app.pickWinner}
             onMult={app.setMult}
             onShare={() => setShowShare(true)}
+          />
+        )}
+        {tab === "dia" && (
+          <DailyView
+            kickoffs={app.kickoffs}
+            now={app.now}
+            daily={app.state.daily}
+            results={app.results}
+            onWinner={app.setDailyWinner}
+            onScore={app.setDailyScore}
           />
         )}
         {tab === "ligas" && (
@@ -121,6 +157,24 @@ export default function MiMundialApp() {
         {tab === "logros" && <AchievementsView unlocked={app.unlocked} />}
         {tab === "ranking" && (
           <RankingView score={app.totalScore} favorite={app.state.favorite} />
+        )}
+        {tab === "perfil" && (
+          <ProfileView
+            name={app.state.name}
+            favorite={app.state.favorite}
+            level={app.level}
+            totalScore={app.totalScore}
+            pending={app.pending}
+            streak={app.state.streakCount}
+            made={app.made}
+            dailyCount={app.dailyCount}
+            hits={app.hits}
+            leaguesCount={app.state.leagues.length}
+            duelsCount={app.state.duels.length}
+            unlocked={app.unlocked}
+            onName={app.setName}
+            onShare={() => setShowShare(true)}
+          />
         )}
       </main>
 
@@ -166,15 +220,18 @@ function Logo() {
   );
 }
 
-function ScorePill({
-  score,
-  made,
-  bonus,
-}: {
-  score: number;
-  made: number;
-  bonus: number;
-}) {
+function LevelChip({ level, pct }: { level: number; pct: number }) {
+  return (
+    <div className="hidden md:flex flex-col items-center gap-1 rounded-full border border-neon/30 bg-neon/10 px-3 py-1.5">
+      <span className="text-xs font-display text-neon leading-none">Nv {level}</span>
+      <div className="w-12 h-1 rounded-full bg-white/15 overflow-hidden">
+        <div className="h-full bg-neon" style={{ width: `${pct}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function ScorePill({ score, pending }: { score: number; pending: number }) {
   return (
     <div className="flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-3 py-1.5 glow-gold">
       <span className="hidden sm:inline text-xs uppercase tracking-wider text-gold/80">
@@ -183,9 +240,11 @@ function ScorePill({
       <span className="font-display text-lg text-gold leading-none tabular-nums">
         {score}
       </span>
-      <span className="hidden md:inline text-[11px] text-white/45">
-        · {made} picks{bonus ? ` · +${bonus} racha` : ""}
-      </span>
+      {pending > 0 && (
+        <span className="hidden md:inline text-[11px] text-white/45">
+          +{pending} en juego
+        </span>
+      )}
     </div>
   );
 }

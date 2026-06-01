@@ -3,6 +3,7 @@
 import { TEAM_BY_CODE } from "@/data/teams";
 import { type Match, type Round, ROUND_POINTS } from "@/lib/bracket";
 import { isLocked } from "@/lib/schedule";
+import type { PickStatus } from "@/lib/results";
 import Flag from "@/components/Flag";
 import Countdown from "@/components/Countdown";
 
@@ -12,6 +13,7 @@ export default function BracketView({
   favorite,
   kickoffs,
   mult,
+  statuses,
   onPick,
   onMult,
   onShare,
@@ -21,6 +23,7 @@ export default function BracketView({
   favorite: string | null;
   kickoffs: Record<string, number>;
   mult: Record<string, number>;
+  statuses: Record<string, PickStatus>;
   onPick: (matchId: string, code: string) => void;
   onMult: (matchId: string, n: number) => void;
   onShare: () => void;
@@ -49,6 +52,7 @@ export default function BracketView({
                     favorite={favorite}
                     kickoff={kickoffs[m.id]}
                     mult={mult[m.id] ?? 1}
+                    status={statuses[m.id]}
                     onPick={onPick}
                     onMult={onMult}
                   />
@@ -67,6 +71,7 @@ function MatchCard({
   favorite,
   kickoff,
   mult,
+  status,
   onPick,
   onMult,
 }: {
@@ -74,12 +79,14 @@ function MatchCard({
   favorite: string | null;
   kickoff?: number;
   mult: number;
+  status?: PickStatus;
   onPick: (matchId: string, code: string) => void;
   onMult: (matchId: string, n: number) => void;
 }) {
   const locked = isLocked(kickoff, Date.now());
   const hasKickoff = kickoff !== undefined;
   const showMult = !!match.winner && !locked;
+  const resolved = status === "hit" || status === "miss";
 
   return (
     <div
@@ -87,17 +94,28 @@ function MatchCard({
         locked ? "opacity-90 ring-1 ring-hot/30" : ""
       }`}
     >
-      {hasKickoff && (
+      {resolved ? (
         <div className="flex items-center justify-between px-1.5 pt-0.5 text-[10px]">
-          <span className="text-white/35">
-            {locked ? "🔒 Bloqueado" : "Por jugar"}
-          </span>
-          <Countdown target={kickoff} className="text-[10px]" />
+          <span className="text-white/35">Resultado</span>
+          {status === "hit" ? (
+            <span className="text-neon font-semibold">✓ Acierto</span>
+          ) : (
+            <span className="text-hot font-semibold">✗ Fallo</span>
+          )}
         </div>
+      ) : (
+        hasKickoff && (
+          <div className="flex items-center justify-between px-1.5 pt-0.5 text-[10px]">
+            <span className="text-white/35">
+              {locked ? "🔒 Bloqueado" : "Por jugar"}
+            </span>
+            <Countdown target={kickoff} className="text-[10px]" />
+          </div>
+        )
       )}
 
-      <Slot match={match} code={match.a} favorite={favorite} locked={locked} onPick={onPick} />
-      <Slot match={match} code={match.b} favorite={favorite} locked={locked} onPick={onPick} />
+      <Slot match={match} code={match.a} favorite={favorite} locked={locked} status={status} onPick={onPick} />
+      <Slot match={match} code={match.b} favorite={favorite} locked={locked} status={status} onPick={onPick} />
 
       {showMult && (
         <div className="flex items-center justify-end gap-1 px-1 pb-0.5">
@@ -130,12 +148,14 @@ function Slot({
   code,
   favorite,
   locked,
+  status,
   onPick,
 }: {
   match: Match;
   code: string | null;
   favorite: string | null;
   locked: boolean;
+  status?: PickStatus;
   onPick: (matchId: string, code: string) => void;
 }) {
   if (!code) {
@@ -151,13 +171,19 @@ function Slot({
   const isLoser = match.winner && match.winner !== code;
   const isFav = favorite === code;
   const disabled = locked && !match.winner;
+  const hit = isWinner && status === "hit";
+  const miss = isWinner && status === "miss";
 
   return (
     <button
       onClick={() => !locked && onPick(match.id, code)}
       disabled={locked}
       className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition ${
-        isWinner
+        hit
+          ? "bg-neon/20 text-neon glow-neon font-semibold"
+          : miss
+          ? "bg-hot/15 text-hot font-semibold line-through decoration-hot/50"
+          : isWinner
           ? "bg-gold/20 text-gold glow-gold font-semibold"
           : isLoser
           ? "opacity-40"
@@ -169,7 +195,10 @@ function Slot({
       <Flag code={t.code} className="w-7 h-5 shrink-0" />
       <span className="flex-1 text-left truncate">{t.name}</span>
       {isFav && <span className="text-[10px] text-neon">★</span>}
-      {isWinner && <span className="text-gold">✓</span>}
+      {hit && <span className="text-neon">✓</span>}
+      {miss && <span className="text-hot">✗</span>}
+      {isWinner && !status && <span className="text-gold">✓</span>}
+      {isWinner && status === "pending" && <span className="text-gold">✓</span>}
     </button>
   );
 }

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Flag from "@/components/Flag";
 import { AreaChart, BarChart, Donut } from "@/components/admin/Charts";
+import ResultsEditor from "@/components/admin/ResultsEditor";
 import {
   KPIS,
   SIGNUPS_14D,
@@ -205,6 +206,16 @@ export default function AdminPage() {
               </div>
             </Card>
           </div>
+        </section>
+
+        {/* Resultados oficiales */}
+        <section>
+          <Card
+            title="Resultados oficiales"
+            subtitle="Calcula puntos de todos"
+          >
+            <ResultsEditor />
+          </Card>
         </section>
 
         {/* Usuarios recientes */}

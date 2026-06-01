@@ -35,3 +35,11 @@ export function getKickoffs(base: number): Record<string, number> {
 export function isLocked(kickoff: number | undefined, now: number): boolean {
   return kickoff !== undefined && kickoff <= now;
 }
+
+// Bonus por anticipación: a más horas antes del pitazo, más puntos extra.
+export function earlyBonus(kickoff: number | undefined, now: number): number {
+  if (kickoff === undefined) return 0;
+  const hours = (kickoff - now) / (60 * 60 * 1000);
+  if (hours <= 0) return 0;
+  return Math.max(2, Math.min(25, Math.round(hours)));
+}

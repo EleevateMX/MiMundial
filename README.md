@@ -35,6 +35,15 @@ gana a quién en todo el cuadro y compite en un **ranking global**.
 - **Panel de Admin** (`/admin`, clave demo `admin`): KPIs (usuarios, DAU, altas,
   instalaciones PWA…), gráficos de altas y activos, campeón más predicho,
   distribución de logros, dispositivos, retención y registros recientes.
+  - **Resultados oficiales**: el admin marca al ganador real de cada partido y
+    los **puntos se calculan automáticamente** para todos (aciertos/fallos en el
+    cuadro).
+- **Niveles y XP** con barra de progreso, **subida de nivel** y **toasts de
+  recompensa** con sonido (WebAudio) y vibración; toggle de sonido 🔊.
+- **Predicción del día** (mini-quinielas): partidos rápidos con **bonus por
+  anticipación** (a más temprano, más puntos) y marcador exacto opcional.
+- **Perfil de jugador**: avatar, nombre editable, nivel, racha, estadísticas y
+  **vitrina de medallas**; tarjeta compartible.
 
 > Todo el progreso (cuadro, favorito, racha, ligas, logros) se guarda en el
 > navegador con `localStorage` para que se sienta como app real. Al conectar

@@ -10,6 +10,9 @@ export type AchievementCtx = {
   leagues: number; // ligas creadas/unidas
   duels: number; // duelos lanzados
   shared: boolean;
+  dailyCount: number; // predicciones del día hechas
+  maxEarlyBonus: number; // mayor bonus de anticipación logrado
+  hits: number; // aciertos confirmados
 };
 
 export type Achievement = {
@@ -93,6 +96,27 @@ export const ACHIEVEMENTS: Achievement[] = [
     icon: "📣",
     desc: "Comparte tu cuadro.",
     check: (c) => c.shared,
+  },
+  {
+    id: "quinielero",
+    name: "Quinielero",
+    icon: "🗓️",
+    desc: "Haz una predicción del día.",
+    check: (c) => c.dailyCount >= 1,
+  },
+  {
+    id: "madrugador",
+    name: "Madrugador",
+    icon: "⏰",
+    desc: "Consigue un bonus de anticipación de 15+.",
+    check: (c) => c.maxEarlyBonus >= 15,
+  },
+  {
+    id: "acertador",
+    name: "Acertador",
+    icon: "✅",
+    desc: "Acierta una predicción ya resuelta.",
+    check: (c) => c.hits >= 1,
   },
 ];
 
