@@ -24,7 +24,12 @@ export async function proxy(req: NextRequest) {
   });
 
   // Importante: refresca el token si está por expirar.
-  await supabase.auth.getUser();
+  // Protegido para que un Supabase inalcanzable no rompa la navegación.
+  try {
+    await supabase.auth.getUser();
+  } catch {
+    // sin sesión / sin red: continuar normalmente
+  }
   return res;
 }
 
