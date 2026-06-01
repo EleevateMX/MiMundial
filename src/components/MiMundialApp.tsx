@@ -8,6 +8,7 @@ import { signOut } from "@/lib/supabase/useUser";
 import Confetti from "@/components/Confetti";
 import Flag from "@/components/Flag";
 import AdSlot from "@/components/AdSlot";
+import { CrestTile } from "@/components/Brand";
 import StreakChip from "@/components/StreakChip";
 import ShareModal from "@/components/ShareModal";
 import RewardToaster from "@/components/RewardToaster";
@@ -218,9 +219,7 @@ export default function MiMundialApp() {
 function Logo() {
   return (
     <Link href="/" className="flex items-center gap-2 select-none">
-      <div className="size-9 rounded-xl bg-gradient-to-br from-gold to-gold-deep grid place-items-center text-black font-display text-xl shadow-lg glow-gold">
-        M
-      </div>
+      <CrestTile className="size-9" />
       <div className="leading-none">
         <div className="font-display text-2xl tracking-wide">
           <span className="text-gold-gradient">MI MUNDIAL</span>

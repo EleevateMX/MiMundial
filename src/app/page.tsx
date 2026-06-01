@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Flag from "@/components/Flag";
 import InstallButton from "@/components/InstallButton";
+import { Crest } from "@/components/Brand";
 import { TEAMS } from "@/data/teams";
 
 const HERO_FLAGS = [
@@ -18,6 +19,8 @@ export default function Landing() {
       </div>
 
       <main className="relative mx-auto max-w-4xl px-6 py-20 sm:py-28 text-center flex-1 flex flex-col items-center justify-center">
+        <Crest className="w-20 h-20 mb-4 drop-shadow-[0_8px_24px_rgba(255,210,74,0.35)]" />
+
         <span className="inline-flex items-center gap-2 rounded-full border border-neon/30 bg-neon/10 px-3 py-1 text-xs uppercase tracking-widest text-neon">
           Solo predicciones · sin apuestas
         </span>

@@ -21,6 +21,7 @@ import { TEAM_BY_CODE } from "@/data/teams";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { useUser } from "@/lib/supabase/useUser";
 import { fetchIsAdmin, fetchAdminStats, type AdminStats } from "@/lib/supabase/data";
+import { CrestTile } from "@/components/Brand";
 
 const ADMIN_PASS = "admin"; // Solo modo demo (sin Supabase).
 
@@ -130,9 +131,7 @@ export default function AdminPage() {
       <header className="sticky top-0 z-30 glass border-b border-white/10">
         <div className="mx-auto max-w-7xl px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="size-9 rounded-xl bg-gradient-to-br from-gold to-gold-deep grid place-items-center text-black font-display text-xl glow-gold">
-              M
-            </div>
+            <CrestTile className="size-9" />
             <div>
               <div className="font-display text-xl text-gold-gradient leading-none">
                 PANEL DE ADMIN
