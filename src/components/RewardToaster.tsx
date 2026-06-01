@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ACHIEVEMENTS } from "@/lib/achievements";
 import { setSoundEnabled, playUnlock, playLevelUp } from "@/lib/fx";
+import Icon from "@/components/Icon";
 
 type Toast = { id: number; icon: string; title: string; sub: string; kind: "ach" | "level" };
 
@@ -71,12 +72,29 @@ export default function RewardToaster({
       {toasts.map((t) => (
         <div
           key={t.id}
-          className={`float-up glass rounded-2xl px-4 py-2.5 flex items-center gap-3 glow-gold max-w-sm w-full ${
-            t.kind === "level" ? "border-neon/40" : ""
+          className={`float-up relative glass rounded-2xl pl-2.5 pr-4 py-2.5 flex items-center gap-3 max-w-sm w-full overflow-hidden ${
+            t.kind === "level" ? "glow-neon" : "glow-gold"
           }`}
         >
-          <span className="text-2xl">{t.icon}</span>
-          <div className="leading-tight">
+          <div className="absolute inset-0 shimmer opacity-30 pointer-events-none" />
+          {/* Medallón */}
+          <div
+            className="relative grid place-items-center size-12 rounded-xl shrink-0 border border-white/15"
+            style={{
+              background:
+                t.kind === "level"
+                  ? "linear-gradient(135deg,#d6fff4,#2bf5c0 55%,#16b893)"
+                  : "linear-gradient(135deg,#fff7da,#ffd24a 55%,#f0a72c)",
+              boxShadow: "0 4px 14px rgba(0,0,0,0.35)",
+            }}
+          >
+            {t.kind === "level" ? (
+              <Icon name="nivel" className="size-7 text-black" strokeWidth={2.2} />
+            ) : (
+              <span className="text-2xl drop-shadow">{t.icon}</span>
+            )}
+          </div>
+          <div className="relative leading-tight">
             <div
               className={`font-display text-base ${
                 t.kind === "level" ? "text-neon" : "text-gold"

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Flag from "@/components/Flag";
+import Avatar, { avatarSeedFor } from "@/components/Avatar";
 import {
   fetchMessages,
   sendMessage,
@@ -10,10 +10,12 @@ import {
 } from "@/lib/supabase/chat";
 
 const DEMO_SEED: Omit<ChatMessage, "league_id">[] = [
-  { id: "d1", user_id: "u1", name: "Regina_07", favorite: "mx", body: "¿Quién va a su selección a la final? 👀", created_at: "" },
-  { id: "d2", user_id: "u2", name: "kevoo", favorite: "br", body: "Brasil campeón, ni lo duden 🇧🇷🏆", created_at: "" },
-  { id: "d3", user_id: "u3", name: "DonPepe", favorite: "es", body: "Jajaja ya veremos en cuartos 😏", created_at: "" },
+  { id: "d1", user_id: "u1", name: "Regina_07", favorite: "mx", avatar: "capitan", body: "¿Quién va a su selección a la final? 👀", created_at: "" },
+  { id: "d2", user_id: "u2", name: "kevoo", favorite: "br", avatar: "fenomeno", body: "Brasil campeón, ni lo duden 🇧🇷🏆", created_at: "" },
+  { id: "d3", user_id: "u3", name: "DonPepe", favorite: "es", avatar: "muralla", body: "Jajaja ya veremos en cuartos 😏", created_at: "" },
 ];
+
+const REACTIONS = ["🔥", "👏", "😂", "⚽"];
 
 export default function LeagueChat({
   leagueId,
@@ -24,13 +26,17 @@ export default function LeagueChat({
 }: {
   leagueId: string | null;
   leagueName: string;
-  me: { userId: string | null; name: string; favorite: string | null };
+  me: { userId: string | null; name: string; favorite: string | null; avatar: string };
   cloud: boolean;
   onClose: () => void;
 }) {
   const isLive = cloud && !!leagueId && !!me.userId;
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [text, setText] = useState("");
+  // Reacciones locales: { [msgId]: { '🔥': count, ... } } y la mía
+  const [reactions, setReactions] = useState<Record<string, Record<string, number>>>({});
+  const [mine, setMine] = useState<Record<string, string>>({});
+  const [pickerFor, setPickerFor] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -41,8 +47,8 @@ export default function LeagueChat({
       );
       return unsub;
     }
-    // Demo
     setMessages(DEMO_SEED.map((m) => ({ ...m, league_id: "demo" })));
+    setReactions({ d2: { "🔥": 2 }, d3: { "😂": 1 } });
   }, [isLive, leagueId]);
 
   useEffect(() => {
@@ -59,6 +65,7 @@ export default function LeagueChat({
         userId: me.userId,
         name: me.name,
         favorite: me.favorite,
+        avatar: me.avatar,
         body,
       });
     } else {
@@ -70,11 +77,32 @@ export default function LeagueChat({
           user_id: "me",
           name: me.name,
           favorite: me.favorite,
+          avatar: me.avatar,
           body,
           created_at: new Date().toISOString(),
         },
       ]);
     }
+  }
+
+  function react(msgId: string, emoji: string) {
+    setReactions((r) => {
+      const cur = { ...(r[msgId] ?? {}) };
+      const prev = mine[msgId];
+      if (prev === emoji) {
+        cur[emoji] = Math.max(0, (cur[emoji] ?? 1) - 1);
+        if (cur[emoji] === 0) delete cur[emoji];
+      } else {
+        if (prev) {
+          cur[prev] = Math.max(0, (cur[prev] ?? 1) - 1);
+          if (cur[prev] === 0) delete cur[prev];
+        }
+        cur[emoji] = (cur[emoji] ?? 0) + 1;
+      }
+      return { ...r, [msgId]: cur };
+    });
+    setMine((m) => ({ ...m, [msgId]: m[msgId] === emoji ? "" : emoji }));
+    setPickerFor(null);
   }
 
   return (
@@ -83,7 +111,6 @@ export default function LeagueChat({
         className="w-full sm:max-w-md bg-[#0a0e1c] border-l border-white/10 flex flex-col h-full"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="flex items-center justify-between px-4 h-14 border-b border-white/10 glass">
           <div className="min-w-0">
             <div className="font-display text-lg text-gold truncate">{leagueName}</div>
@@ -96,33 +123,63 @@ export default function LeagueChat({
           </button>
         </div>
 
-        {/* Mensajes */}
         <div className="flex-1 overflow-y-auto px-3 py-4 space-y-3">
           {messages.length === 0 && (
-            <div className="text-center text-white/40 text-sm mt-10">
-              Sé el primero en escribir 👋
-            </div>
+            <div className="text-center text-white/40 text-sm mt-10">Sé el primero en escribir 👋</div>
           )}
           {messages.map((m) => {
-            const mine = (isLive ? m.user_id === me.userId : m.user_id === "me");
+            const mineMsg = isLive ? m.user_id === me.userId : m.user_id === "me";
+            const idStr = String(m.id);
+            const reacts = reactions[idStr] ?? {};
+            const seed = avatarSeedFor(m.avatar, m.name);
             return (
-              <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[78%] ${mine ? "items-end" : "items-start"} flex flex-col`}>
-                  {!mine && (
-                    <span className="flex items-center gap-1.5 text-[11px] text-white/50 mb-0.5 px-1">
-                      {m.favorite && <Flag code={m.favorite} className="w-4 h-3" />}
-                      {m.name}
-                    </span>
+              <div key={m.id} className={`flex gap-2 ${mineMsg ? "flex-row-reverse" : "flex-row"}`}>
+                <Avatar seed={seed} className="size-8 rounded-full shrink-0 self-end" />
+                <div className={`max-w-[72%] flex flex-col ${mineMsg ? "items-end" : "items-start"}`}>
+                  {!mineMsg && (
+                    <span className="text-[11px] text-white/50 mb-0.5 px-1">{m.name}</span>
                   )}
-                  <div
-                    className={`rounded-2xl px-3 py-2 text-sm ${
-                      mine
-                        ? "bg-gold text-black rounded-br-sm"
-                        : "bg-white/8 text-white rounded-bl-sm"
-                    }`}
-                  >
-                    {m.body}
+                  <div className="relative group">
+                    <div
+                      onDoubleClick={() => react(idStr, "🔥")}
+                      className={`rounded-2xl px-3 py-2 text-sm ${
+                        mineMsg ? "bg-gold text-black rounded-br-sm" : "bg-white/8 text-white rounded-bl-sm"
+                      }`}
+                    >
+                      {m.body}
+                    </div>
+                    <button
+                      onClick={() => setPickerFor(pickerFor === idStr ? null : idStr)}
+                      className={`absolute -bottom-2 ${mineMsg ? "left-0" : "right-0"} text-white/40 hover:text-gold text-xs`}
+                    >
+                      ☺
+                    </button>
+                    {pickerFor === idStr && (
+                      <div className={`absolute z-10 -top-9 ${mineMsg ? "right-0" : "left-0"} flex gap-1 glass rounded-full px-2 py-1`}>
+                        {REACTIONS.map((e) => (
+                          <button key={e} onClick={() => react(idStr, e)} className="hover:scale-125 transition text-base leading-none">
+                            {e}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
+                  {/* Reacciones */}
+                  {Object.keys(reacts).length > 0 && (
+                    <div className={`flex gap-1 mt-1 ${mineMsg ? "flex-row-reverse" : ""}`}>
+                      {Object.entries(reacts).map(([e, n]) => (
+                        <button
+                          key={e}
+                          onClick={() => react(idStr, e)}
+                          className={`text-[11px] rounded-full px-1.5 py-0.5 border ${
+                            mine[idStr] === e ? "border-gold bg-gold/15" : "border-white/10 bg-white/5"
+                          }`}
+                        >
+                          {e} {n}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -130,7 +187,6 @@ export default function LeagueChat({
           <div ref={endRef} />
         </div>
 
-        {/* Input */}
         {!cloud ? (
           <div className="p-3 border-t border-white/10 text-center text-[11px] text-white/45">
             Inicia sesión para chatear de verdad con tu liga.
@@ -150,10 +206,7 @@ export default function LeagueChat({
               placeholder="Escribe un mensaje…"
               className="flex-1 rounded-full bg-black/30 border border-white/10 px-4 py-2.5 outline-none focus:border-gold/60 text-sm"
             />
-            <button
-              type="submit"
-              className="size-11 rounded-full bg-gold text-black font-bold grid place-items-center hover:brightness-110 transition"
-            >
+            <button type="submit" className="size-11 rounded-full bg-gold text-black font-bold grid place-items-center hover:brightness-110 transition">
               ➤
             </button>
           </form>

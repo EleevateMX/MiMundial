@@ -6,6 +6,7 @@ import type { LevelInfo } from "@/lib/levels";
 import { buildActivity } from "@/lib/activity";
 import Flag from "@/components/Flag";
 import Avatar, { avatarSeedFor } from "@/components/Avatar";
+import NotifButton from "@/components/NotifButton";
 
 const AVATAR_SEEDS = [
   "balon", "goleador", "crack", "mundial", "capitan", "figura",
@@ -173,6 +174,17 @@ export default function ProfileView({
             );
           })}
         </div>
+      </div>
+
+      {/* Notificaciones */}
+      <div className="glass rounded-2xl p-4 flex items-center justify-between gap-3 flex-wrap">
+        <div>
+          <h3 className="font-display text-lg text-gold">NOTIFICACIONES</h3>
+          <p className="text-xs text-white/55">
+            Avisos de tus partidos y mensajes de tu liga.
+          </p>
+        </div>
+        <NotifButton />
       </div>
 
       {/* Estadísticas */}

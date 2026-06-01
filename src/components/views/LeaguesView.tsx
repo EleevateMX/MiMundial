@@ -25,6 +25,7 @@ export default function LeaguesView({
   score,
   favorite,
   myName,
+  avatarSeed,
   userId,
   onCreate,
   onJoin,
@@ -33,6 +34,7 @@ export default function LeaguesView({
   score: number;
   favorite: string | null;
   myName: string;
+  avatarSeed: string;
   userId: string | null;
   onCreate: (name: string) => string;
   onJoin: (code: string) => void;
@@ -161,7 +163,7 @@ export default function LeaguesView({
         <LeagueChat
           leagueId={chat.id}
           leagueName={chat.name}
-          me={{ userId, name: myName, favorite }}
+          me={{ userId, name: myName, favorite, avatar: avatarSeed }}
           cloud={!!userId}
           onClose={() => setChat(null)}
         />
