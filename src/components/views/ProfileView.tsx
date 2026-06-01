@@ -28,6 +28,7 @@ export default function ProfileView({
   leaguesCount,
   duelsCount,
   unlocked,
+  userId,
   onName,
   onAvatar,
   onShare,
@@ -36,6 +37,7 @@ export default function ProfileView({
   avatar: string;
   favorite: string | null;
   champ: string | null;
+  userId: string | null;
   level: LevelInfo;
   totalScore: number;
   pending: number;
@@ -88,7 +90,7 @@ export default function ProfileView({
 
         <div className="px-5 pb-5 -mt-12 relative flex items-end gap-4">
           <div className="relative shrink-0">
-            <Avatar seed={seed} className="size-20 rounded-2xl border border-white/15 shadow-lg" />
+            <Avatar seed={seed} flag={favorite} className="size-20 rounded-2xl border border-white/15 shadow-lg" />
             {fav && (
               <Flag
                 code={fav.code}
@@ -184,7 +186,7 @@ export default function ProfileView({
             Avisos de tus partidos y mensajes de tu liga.
           </p>
         </div>
-        <NotifButton />
+        <NotifButton userId={userId} />
       </div>
 
       {/* Estadísticas */}

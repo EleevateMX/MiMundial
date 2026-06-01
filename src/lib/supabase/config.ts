@@ -8,3 +8,16 @@ export const isSupabaseConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON);
 
 // hCaptcha (opcional). Si está, se exige resolver el captcha al registrarse.
 export const HCAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY ?? "";
+
+// Correos con acceso de administrador (además del rol en la BD).
+export const ADMIN_EMAILS = [
+  "edronemidmx@gmail.com",
+  "edykiira@gmail.com",
+];
+
+export function isAdminEmail(email: string | null | undefined): boolean {
+  return !!email && ADMIN_EMAILS.includes(email.toLowerCase());
+}
+
+// Clave pública VAPID para notificaciones push (opcional).
+export const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "";

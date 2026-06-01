@@ -109,6 +109,14 @@ body {
   100% { transform: translateY(110vh) rotate(720deg); opacity: 1; }
 }
 
+/* Respeto del notch / barra de estado en modo PWA (standalone) */
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
 .bracket-scroll::-webkit-scrollbar { height: 10px; }
 .bracket-scroll::-webkit-scrollbar-thumb {
   background: rgba(255, 210, 74, 0.35);

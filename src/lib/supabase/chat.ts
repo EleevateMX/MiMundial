@@ -48,6 +48,58 @@ export async function sendMessage(msg: {
   });
 }
 
+// ---------- Reacciones ----------
+export type ReactionRow = { message_id: number; user_id: string; emoji: string };
+
+export async function fetchReactions(leagueId: string): Promise<ReactionRow[]> {
+  const sb = getSupabaseBrowser();
+  if (!sb) return [];
+  const { data } = await sb
+    .from("message_reactions")
+    .select("message_id, user_id, emoji")
+    .eq("league_id", leagueId);
+  return (data as ReactionRow[]) ?? [];
+}
+
+export async function setReaction(
+  messageId: number | string,
+  leagueId: string,
+  userId: string,
+  emoji: string,
+  remove: boolean
+) {
+  const sb = getSupabaseBrowser();
+  if (!sb) return;
+  if (remove) {
+    await sb
+      .from("message_reactions")
+      .delete()
+      .eq("message_id", messageId)
+      .eq("user_id", userId);
+  } else {
+    await sb.from("message_reactions").upsert(
+      { message_id: messageId, league_id: leagueId, user_id: userId, emoji },
+      { onConflict: "message_id,user_id" }
+    );
+  }
+}
+
+export function subscribeReactions(leagueId: string, onChange: () => void): () => void {
+  const sb = getSupabaseBrowser();
+  if (!sb) return () => {};
+  const channel = sb
+    .channel(`react:${leagueId}`)
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "message_reactions", filter: `league_id=eq.${leagueId}` },
+      () => onChange()
+    )
+    .subscribe();
+  return () => {
+    sb.removeChannel(channel);
+  };
+}
+
 // Suscripción Realtime a mensajes nuevos de una liga.
 export function subscribeMessages(
   leagueId: string,
