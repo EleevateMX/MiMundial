@@ -8,6 +8,7 @@ export type ChatMessage = {
   user_id: string;
   name: string;
   favorite: string | null;
+  avatar: string | null;
   body: string;
   created_at: string;
 };
@@ -32,6 +33,7 @@ export async function sendMessage(msg: {
   userId: string;
   name: string;
   favorite: string | null;
+  avatar: string | null;
   body: string;
 }) {
   const sb = getSupabaseBrowser();
@@ -41,6 +43,7 @@ export async function sendMessage(msg: {
     user_id: msg.userId,
     name: msg.name,
     favorite: msg.favorite,
+    avatar: msg.avatar,
     body: msg.body,
   });
 }

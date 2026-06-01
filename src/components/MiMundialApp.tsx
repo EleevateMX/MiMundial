@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { TEAM_BY_CODE } from "@/data/teams";
 import { useAppState } from "@/lib/appState";
@@ -12,7 +12,7 @@ import BottomNav from "@/components/BottomNav";
 import Icon, { type IconName } from "@/components/Icon";
 import Avatar, { avatarSeedFor } from "@/components/Avatar";
 import { CrestTile } from "@/components/Brand";
-import StreakChip from "@/components/StreakChip";
+import { scheduleMatchReminders } from "@/lib/notifications";
 import ShareModal from "@/components/ShareModal";
 import RewardToaster from "@/components/RewardToaster";
 import GroupsView from "@/components/views/GroupsView";
@@ -50,6 +50,9 @@ export default function MiMundialApp() {
   const [tab, setTab] = useState<Tab>("grupos");
   const [showShare, setShowShare] = useState(false);
 
+  // Recordatorios de partidos (si el usuario activó notificaciones)
+  useEffect(() => scheduleMatchReminders(app.kickoffs), [app.kickoffs]);
+
   return (
     <div className="flex flex-col min-h-screen">
       {app.champ && <Confetti />}
@@ -64,28 +67,22 @@ export default function MiMundialApp() {
       <header className="sticky top-0 z-40 glass border-b border-white/10">
         <div className="mx-auto max-w-7xl px-4 h-16 flex items-center justify-between gap-3">
           <Logo />
-          <div className="flex items-center gap-2 sm:gap-3">
-            <LevelChip level={app.level.level} pct={app.level.pct} />
-            <StreakChip
-              streakCount={app.state.streakCount}
+          <div className="flex items-center gap-2">
+            <StatHud
+              level={app.level}
+              points={app.totalScore}
+              pending={app.pending}
+              streak={app.state.streakCount}
               checkedInToday={app.checkedInToday}
               onCheckIn={app.checkIn}
             />
-            <ScorePill score={app.totalScore} pending={app.pending} />
-            <button
-              onClick={app.toggleSound}
+            <GhostIcon
+              name={app.state.soundOn ? "sonidoOn" : "sonidoOff"}
               title={app.state.soundOn ? "Silenciar" : "Activar sonido"}
-              className="hidden sm:grid place-items-center size-9 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition"
-            >
-              {app.state.soundOn ? "🔊" : "🔇"}
-            </button>
-            <button
-              onClick={() => setShowShare(true)}
-              title="Compartir"
-              className="hidden sm:grid place-items-center size-9 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition"
-            >
-              📣
-            </button>
+              onClick={app.toggleSound}
+              dim={!app.state.soundOn}
+            />
+            <GhostIcon name="compartir" title="Compartir" onClick={() => setShowShare(true)} />
             <AuthButton
               user={app.user}
               seed={avatarSeedFor(app.state.avatar, app.state.name || app.user?.email || "mm")}
@@ -155,6 +152,7 @@ export default function MiMundialApp() {
             score={app.totalScore}
             favorite={app.state.favorite}
             myName={app.state.name}
+            avatarSeed={avatarSeedFor(app.state.avatar, app.state.name)}
             userId={app.user?.id ?? null}
             onCreate={app.createLeague}
             onJoin={app.joinLeague}
@@ -288,32 +286,87 @@ function AuthButton({
   );
 }
 
-function LevelChip({ level, pct }: { level: number; pct: number }) {
+function StatHud({
+  level,
+  points,
+  pending,
+  streak,
+  checkedInToday,
+  onCheckIn,
+}: {
+  level: { level: number };
+  points: number;
+  pending: number;
+  streak: number;
+  checkedInToday: boolean;
+  onCheckIn: () => void;
+}) {
   return (
-    <div className="hidden md:flex flex-col items-center gap-1 rounded-full border border-neon/30 bg-neon/10 px-3 py-1.5">
-      <span className="text-xs font-display text-neon leading-none">Nv {level}</span>
-      <div className="w-12 h-1 rounded-full bg-white/15 overflow-hidden">
-        <div className="h-full bg-neon" style={{ width: `${pct}%` }} />
-      </div>
+    <div className="flex items-stretch rounded-2xl glass border border-white/10 overflow-hidden">
+      <Stat icon="nivel" accent="text-neon" value={`Nv ${level.level}`} />
+      <span className="w-px self-stretch bg-white/10" />
+      <Stat icon="puntos" accent="text-gold" value={points} sub={pending > 0 ? `+${pending}` : undefined} />
+      <span className="w-px self-stretch bg-white/10" />
+      {checkedInToday ? (
+        <Stat icon="racha" accent="text-hot" value={streak} label="días" />
+      ) : (
+        <button
+          onClick={onCheckIn}
+          className="flex items-center gap-1.5 px-3 bg-hot text-white font-bold text-sm hover:brightness-110 transition"
+        >
+          <Icon name="racha" className="size-4" />
+          <span className="hidden sm:inline">Check-in</span>
+          <span className="text-[11px] opacity-90">+25</span>
+        </button>
+      )}
     </div>
   );
 }
 
-function ScorePill({ score, pending }: { score: number; pending: number }) {
+function Stat({
+  icon,
+  accent,
+  value,
+  sub,
+  label,
+}: {
+  icon: IconName;
+  accent: string;
+  value: string | number;
+  sub?: string;
+  label?: string;
+}) {
   return (
-    <div className="flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-3 py-1.5 glow-gold">
-      <span className="hidden sm:inline text-xs uppercase tracking-wider text-gold/80">
-        Puntos
-      </span>
-      <span className="font-display text-lg text-gold leading-none tabular-nums">
-        {score}
-      </span>
-      {pending > 0 && (
-        <span className="hidden md:inline text-[11px] text-white/45">
-          +{pending} en juego
-        </span>
-      )}
+    <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5">
+      <Icon name={icon} className={`size-4 ${accent}`} />
+      <span className={`font-display leading-none tabular-nums ${accent}`}>{value}</span>
+      {label && <span className="hidden sm:inline text-[10px] text-white/40">{label}</span>}
+      {sub && <span className="hidden md:inline text-[10px] text-white/40">{sub}</span>}
     </div>
+  );
+}
+
+function GhostIcon({
+  name,
+  title,
+  onClick,
+  dim,
+}: {
+  name: IconName;
+  title: string;
+  onClick: () => void;
+  dim?: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      className={`hidden sm:grid place-items-center size-9 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition ${
+        dim ? "text-white/40" : "text-white/75"
+      }`}
+    >
+      <Icon name={name} className="size-5" />
+    </button>
   );
 }
 

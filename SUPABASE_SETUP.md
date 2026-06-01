@@ -29,6 +29,15 @@ Abre **SQL Editor** en Supabase y ejecuta **en orden** los archivos de
   rol y métricas `admin_stats()`.
 - `0002_chat.sql` — tabla `messages` + RLS + Realtime para el **chat por liga**.
 - `0003_avatar.sql` — columna `avatar` (semilla del avatar generado).
+- `0004_chat_avatar.sql` — guarda el avatar del autor en cada mensaje del chat.
+
+### Notificaciones push
+
+La app ya pide permiso, registra el handler `push`/`notificationclick` en el
+service worker y programa recordatorios de partido **mientras está abierta**.
+Para envíos **en segundo plano** (p. ej. "te escribieron en tu liga" con la app
+cerrada) se necesita un backend con **VAPID** (una Edge Function de Supabase que
+guarde las suscripciones `web-push` y las envíe). Queda listo para conectarse.
 
 ## 3. Login por correo con confirmación (anti-bots)
 

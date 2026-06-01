@@ -8,7 +8,14 @@ export type IconName =
   | "duelo"
   | "logros"
   | "ranking"
-  | "perfil";
+  | "perfil"
+  | "nivel"
+  | "racha"
+  | "puntos"
+  | "sonidoOn"
+  | "sonidoOff"
+  | "compartir"
+  | "campana";
 
 const PATHS: Record<IconName, React.ReactNode> = {
   grupos: (
@@ -80,6 +87,47 @@ const PATHS: Record<IconName, React.ReactNode> = {
     <>
       <circle cx="12" cy="8" r="4" />
       <path d="M4.5 20a7.5 7.5 0 0 1 15 0" />
+    </>
+  ),
+  nivel: (
+    // Estrella (nivel)
+    <path d="M12 3.5l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4-3.9-3.8 5.4-.8z" />
+  ),
+  racha: (
+    // Llama (racha)
+    <path d="M12 21a5 5 0 0 0 5-5c0-3-2.5-5-3.5-8-1 2-1.5 2.5-1.5 4 0 1-.7 1.5-1.3 1.3C8.5 12.5 8 14 8 16a4 4 0 0 0 4 5z" />
+  ),
+  puntos: (
+    // Moneda con estrella (puntos)
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 8l1.2 2.5 2.8.4-2 2 .5 2.7-2.5-1.3-2.5 1.3.5-2.7-2-2 2.8-.4z" />
+    </>
+  ),
+  sonidoOn: (
+    <>
+      <path d="M4 9v6h4l5 4V5L8 9H4z" />
+      <path d="M16.5 9.5a3.5 3.5 0 0 1 0 5M19 7a7 7 0 0 1 0 10" />
+    </>
+  ),
+  sonidoOff: (
+    <>
+      <path d="M4 9v6h4l5 4V5L8 9H4z" />
+      <path d="M16 10l5 4M21 10l-5 4" />
+    </>
+  ),
+  compartir: (
+    <>
+      <circle cx="18" cy="6" r="2.5" />
+      <circle cx="6" cy="12" r="2.5" />
+      <circle cx="18" cy="18" r="2.5" />
+      <path d="M8.2 10.8l7.6-3.6M8.2 13.2l7.6 3.6" />
+    </>
+  ),
+  campana: (
+    <>
+      <path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6z" />
+      <path d="M10.5 19a1.5 1.5 0 0 0 3 0" />
     </>
   ),
 };
