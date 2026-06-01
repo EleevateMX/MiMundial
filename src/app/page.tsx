@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Flag from "@/components/Flag";
+import InstallButton from "@/components/InstallButton";
 import { TEAMS } from "@/data/teams";
 
 const HERO_FLAGS = [
@@ -44,6 +45,10 @@ export default function Landing() {
           >
             Iniciar sesión
           </Link>
+        </div>
+
+        <div className="mt-4">
+          <InstallButton className="rounded-full border border-neon/40 bg-neon/10 text-neon font-semibold px-5 py-2.5 hover:bg-neon/20 transition text-sm" />
         </div>
 
         {/* Banderas destacadas */}

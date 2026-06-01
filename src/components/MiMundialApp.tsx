@@ -126,6 +126,10 @@ export default function MiMundialApp() {
 
       <footer className="border-t border-white/10 py-6 text-center text-xs text-white/40">
         Mi Mundial · Solo predicciones, <span className="text-neon">sin apuestas</span> · Prototipo
+        <span className="mx-2 text-white/20">·</span>
+        <Link href="/admin" className="text-white/35 hover:text-gold transition">
+          Admin
+        </Link>
       </footer>
 
       {showShare && (

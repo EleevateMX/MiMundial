@@ -30,10 +30,16 @@ gana a quién en todo el cuadro y compite en un **ranking global**.
 - **Ranking** global mock + barras de "popularidad" de cada selección.
 - **Login visual** (`/login`): botón de Google + alta por correo con mensaje de
   confirmación anti-bots (aún sin conectar).
+- **PWA instalable** (móvil + escritorio): manifest, íconos, service worker con
+  soporte offline, página `/offline` y botón "Instalar app".
+- **Panel de Admin** (`/admin`, clave demo `admin`): KPIs (usuarios, DAU, altas,
+  instalaciones PWA…), gráficos de altas y activos, campeón más predicho,
+  distribución de logros, dispositivos, retención y registros recientes.
 
 > Todo el progreso (cuadro, favorito, racha, ligas, logros) se guarda en el
 > navegador con `localStorage` para que se sienta como app real. Al conectar
-> Supabase, esto pasará a la nube por usuario.
+> Supabase, esto pasará a la nube por usuario, y el panel de admin mostrará
+> métricas reales.
 
 ## Stack
 
