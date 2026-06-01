@@ -1,0 +1,47 @@
+<!--
+  Plantilla de correo "Confirma tu cuenta" — Mi Mundial
+  Pégala en: Supabase → Authentication → Email Templates → "Confirm signup"
+  Asunto sugerido: Confirma tu cuenta en Mi Mundial ⚽
+  Variable de Supabase: {{ .ConfirmationURL }}
+-->
+<!DOCTYPE html>
+<html lang="es">
+  <body style="margin:0;background:#0b0e17;font-family:Arial,Helvetica,sans-serif;color:#f5f7ff;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0b0e17;padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#11162a;border:1px solid rgba(255,255,255,0.08);border-radius:20px;overflow:hidden;">
+            <tr>
+              <td style="padding:30px 28px;text-align:center;">
+                <div style="font-size:13px;letter-spacing:3px;color:#2bf5c0;text-transform:uppercase;">
+                  ⚽ Mi Mundial
+                </div>
+                <h1 style="margin:10px 0 0;font-size:28px;color:#ffd24a;">Confirma tu cuenta</h1>
+                <p style="color:#c9cede;font-size:15px;line-height:1.55;margin:14px 0 26px;">
+                  ¡Bienvenido a <strong>Mi Mundial</strong>! Confirma tu correo para
+                  guardar tu cuadro, armar tus predicciones y entrar al ranking.
+                </p>
+                <a href="{{ .ConfirmationURL }}"
+                   style="display:inline-block;background:#ffd24a;color:#0b0e17;font-weight:bold;text-decoration:none;padding:14px 30px;border-radius:999px;font-size:16px;">
+                  Confirmar mi correo
+                </a>
+                <p style="color:#8a90a6;font-size:12px;margin:24px 0 0;line-height:1.5;">
+                  Si el botón no funciona, copia y pega este enlace en tu navegador:<br />
+                  <a href="{{ .ConfirmationURL }}" style="color:#ffd24a;word-break:break-all;">{{ .ConfirmationURL }}</a>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:16px;text-align:center;border-top:1px solid rgba(255,255,255,0.08);">
+                <p style="color:#6b7180;font-size:11px;margin:0;line-height:1.5;">
+                  Mi Mundial · Solo predicciones, sin apuestas.<br />
+                  Si no creaste esta cuenta, ignora este correo.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
