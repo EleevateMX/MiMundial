@@ -1,5 +1,7 @@
 import { R32_MATCHES } from "@/data/teams";
 
+export const R32_LEN = R32_MATCHES.length;
+
 export type Slot = string | null; // código de equipo o vacío
 
 export type Match = {
@@ -66,9 +68,44 @@ export function champion(rounds: Round[]): Slot {
 // Puntos mock por cada predicción según la ronda (más avanzada = más puntos)
 export const ROUND_POINTS = [10, 20, 40, 80, 160];
 
-export function userScore(picks: Record<string, string>): number {
+export function roundOf(matchId: string): number {
+  return Number(matchId.split("-")[0].slice(1));
+}
+
+// Puntaje de predicciones, considerando multiplicadores por partido (x1..x3).
+export function userScore(
+  picks: Record<string, string>,
+  mult: Record<string, number> = {}
+): number {
   return Object.keys(picks).reduce((sum, id) => {
-    const round = Number(id.split("-")[0].slice(1));
-    return sum + (ROUND_POINTS[round] ?? 0);
+    const base = ROUND_POINTS[roundOf(id)] ?? 0;
+    return sum + base * (mult[id] ?? 1);
   }, 0);
+}
+
+// Simula un cuadro completo aplicando una función de decisión a cada cruce.
+// Devuelve el mapa de picks resultante (igual formato que el usuario).
+export function simulate(
+  decide: (a: string, b: string, matchId: string) => string
+): Record<string, string> {
+  const picks: Record<string, string> = {};
+  let prev = R32_MATCHES.map(([a, b], i) => {
+    const id = `r0-${i}`;
+    const w = decide(a, b, id);
+    picks[id] = w;
+    return w;
+  });
+  for (let round = 1; round <= 4; round++) {
+    const next: string[] = [];
+    for (let i = 0; i < prev.length / 2; i++) {
+      const id = `r${round}-${i}`;
+      const a = prev[i * 2];
+      const b = prev[i * 2 + 1];
+      const w = decide(a, b, id);
+      picks[id] = w;
+      next.push(w);
+    }
+    prev = next;
+  }
+  return picks;
 }

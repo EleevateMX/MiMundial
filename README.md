@@ -15,9 +15,25 @@ gana a quién en todo el cuadro y compite en un **ranking global**.
 - **Mi Cuadro** (bracket interactivo): Ronda de 32 → Octavos → Cuartos →
   Semifinal → Final. Toca al ganador de cada partido y corona a tu campeón
   (con confeti 🎉).
+  - **Cuenta regresiva + bloqueo de picks**: cada partido tiene hora; al pitazo
+    se cierra y ya no puedes cambiar tu predicción. 🔒
+  - **Multiplicadores de riesgo** (x1 / x2 / x3): arriesga más puntos en tus
+    corazonadas. Sin dinero, pura adrenalina.
+- **Ligas** con amigos: crea una liga (genera **código de invitación**), únete
+  con un código y compite en un **ranking privado**.
+- **Duelo 1v1**: reta a un rival y comparen cuadros (campeones enfrentados +
+  % de coincidencia + dónde no coinciden).
+- **Logros / medallas**: Profeta, Cazador de sorpresas, Estratega, etc., con
+  barra de progreso.
+- **Racha diaria (check-in)**: entra cada día, mantén tu racha 🔥 y gana puntos.
+- **Compartir tu cuadro** como imagen (PNG) para redes.
 - **Ranking** global mock + barras de "popularidad" de cada selección.
 - **Login visual** (`/login`): botón de Google + alta por correo con mensaje de
   confirmación anti-bots (aún sin conectar).
+
+> Todo el progreso (cuadro, favorito, racha, ligas, logros) se guarda en el
+> navegador con `localStorage` para que se sienta como app real. Al conectar
+> Supabase, esto pasará a la nube por usuario.
 
 ## Stack
 
