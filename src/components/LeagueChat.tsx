@@ -6,8 +6,12 @@ import {
   fetchMessages,
   sendMessage,
   subscribeMessages,
+  fetchReactions,
+  setReaction,
+  subscribeReactions,
   type ChatMessage,
 } from "@/lib/supabase/chat";
+import { notifyLeague } from "@/lib/supabase/push";
 
 const DEMO_SEED: Omit<ChatMessage, "league_id">[] = [
   { id: "d1", user_id: "u1", name: "Regina_07", favorite: "mx", avatar: "capitan", body: "¿Quién va a su selección a la final? 👀", created_at: "" },
@@ -39,16 +43,36 @@ export default function LeagueChat({
   const [pickerFor, setPickerFor] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
 
+  async function loadReactions(lid: string) {
+    const rows = await fetchReactions(lid);
+    const counts: Record<string, Record<string, number>> = {};
+    const my: Record<string, string> = {};
+    rows.forEach((r) => {
+      const k = String(r.message_id);
+      counts[k] = counts[k] ?? {};
+      counts[k][r.emoji] = (counts[k][r.emoji] ?? 0) + 1;
+      if (me.userId && r.user_id === me.userId) my[k] = r.emoji;
+    });
+    setReactions(counts);
+    setMine(my);
+  }
+
   useEffect(() => {
     if (isLive && leagueId) {
       fetchMessages(leagueId).then(setMessages);
-      const unsub = subscribeMessages(leagueId, (m) =>
+      loadReactions(leagueId);
+      const unsubM = subscribeMessages(leagueId, (m) =>
         setMessages((list) => (list.some((x) => x.id === m.id) ? list : [...list, m]))
       );
-      return unsub;
+      const unsubR = subscribeReactions(leagueId, () => loadReactions(leagueId));
+      return () => {
+        unsubM();
+        unsubR();
+      };
     }
     setMessages(DEMO_SEED.map((m) => ({ ...m, league_id: "demo" })));
     setReactions({ d2: { "🔥": 2 }, d3: { "😂": 1 } });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLive, leagueId]);
 
   useEffect(() => {
@@ -68,6 +92,7 @@ export default function LeagueChat({
         avatar: me.avatar,
         body,
       });
+      notifyLeague(leagueId, `${me.name} · ${leagueName}`, body, me.userId);
     } else {
       setMessages((list) => [
         ...list,
@@ -86,6 +111,10 @@ export default function LeagueChat({
   }
 
   function react(msgId: string, emoji: string) {
+    if (isLive && leagueId && me.userId) {
+      const remove = mine[msgId] === emoji;
+      setReaction(msgId, leagueId, me.userId, emoji, remove);
+    }
     setReactions((r) => {
       const cur = { ...(r[msgId] ?? {}) };
       const prev = mine[msgId];
@@ -134,7 +163,7 @@ export default function LeagueChat({
             const seed = avatarSeedFor(m.avatar, m.name);
             return (
               <div key={m.id} className={`flex gap-2 ${mineMsg ? "flex-row-reverse" : "flex-row"}`}>
-                <Avatar seed={seed} className="size-8 rounded-full shrink-0 self-end" />
+                <Avatar seed={seed} flag={m.favorite} className="size-8 rounded-full shrink-0 self-end" />
                 <div className={`max-w-[72%] flex flex-col ${mineMsg ? "items-end" : "items-start"}`}>
                   {!mineMsg && (
                     <span className="text-[11px] text-white/50 mb-0.5 px-1">{m.name}</span>

@@ -30,14 +30,33 @@ Abre **SQL Editor** en Supabase y ejecuta **en orden** los archivos de
 - `0002_chat.sql` — tabla `messages` + RLS + Realtime para el **chat por liga**.
 - `0003_avatar.sql` — columna `avatar` (semilla del avatar generado).
 - `0004_chat_avatar.sql` — guarda el avatar del autor en cada mensaje del chat.
+- `0005_admin_email.sql` — hace admin automáticamente a ciertos correos
+  (`edronemidmx@gmail.com`, `edykiira@gmail.com`) a nivel de seguridad (RLS).
+- `0006_reactions.sql` — reacciones a mensajes (compartidas + Realtime).
+- `0007_activity.sql` — feed de actividad global (en vivo).
+- `0008_push.sql` — suscripciones de notificaciones push.
 
-### Notificaciones push
+> Con `0005`, esos correos ya entran a `/admin` por rol y pueden guardar
+> resultados/anuncios. (En el cliente, la lista está en `src/lib/supabase/config.ts`.)
 
-La app ya pide permiso, registra el handler `push`/`notificationclick` en el
-service worker y programa recordatorios de partido **mientras está abierta**.
-Para envíos **en segundo plano** (p. ej. "te escribieron en tu liga" con la app
-cerrada) se necesita un backend con **VAPID** (una Edge Function de Supabase que
-guarde las suscripciones `web-push` y las envíe). Queda listo para conectarse.
+### Notificaciones push en segundo plano (VAPID + Edge Function)
+
+Para avisar **aunque la app esté cerrada** ("te escribieron en tu liga"):
+
+1. Genera las llaves: `npx web-push generate-vapid-keys`.
+2. **En Vercel** (variable pública): `NEXT_PUBLIC_VAPID_PUBLIC_KEY=<public>`.
+3. **Despliega la función**: `supabase functions deploy send-push`.
+4. **Secrets de la función**:
+   ```
+   supabase secrets set VAPID_PUBLIC_KEY=<public> VAPID_PRIVATE_KEY=<private> \
+     VAPID_SUBJECT=mailto:tu@correo.com
+   ```
+5. Corre `0008_push.sql`. Listo: al activar notificaciones en el perfil se guarda
+   la suscripción, y al enviar un mensaje de chat se invoca `send-push` para
+   avisar al resto de la liga.
+
+> Sin VAPID, las notificaciones siguen funcionando **localmente** (recordatorios
+> de partido mientras la app está abierta).
 
 ## 3. Login por correo con confirmación (anti-bots)
 

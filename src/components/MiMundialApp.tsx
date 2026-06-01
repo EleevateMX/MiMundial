@@ -64,7 +64,7 @@ export default function MiMundialApp() {
       />
 
       {/* ===== Top bar ===== */}
-      <header className="sticky top-0 z-40 glass border-b border-white/10">
+      <header className="sticky top-0 z-40 glass border-b border-white/10 safe-top">
         <div className="mx-auto max-w-7xl px-4 h-16 flex items-center justify-between gap-3">
           <Logo />
           <div className="flex items-center gap-2">
@@ -86,6 +86,7 @@ export default function MiMundialApp() {
             <AuthButton
               user={app.user}
               seed={avatarSeedFor(app.state.avatar, app.state.name || app.user?.email || "mm")}
+              favorite={app.state.favorite}
             />
           </div>
         </div>
@@ -190,6 +191,7 @@ export default function MiMundialApp() {
             leaguesCount={app.state.leagues.length}
             duelsCount={app.state.duels.length}
             unlocked={app.unlocked}
+            userId={app.user?.id ?? null}
             onName={app.setName}
             onAvatar={app.setAvatar}
             onShare={() => setShowShare(true)}
@@ -257,9 +259,11 @@ function Logo() {
 function AuthButton({
   user,
   seed,
+  favorite,
 }: {
   user: { email?: string } | null;
   seed: string;
+  favorite: string | null;
 }) {
   if (!user) {
     return (
@@ -280,7 +284,7 @@ function AuthButton({
       title={`${user.email ?? ""} · Cerrar sesión`}
       className="flex items-center gap-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 pl-1 pr-3 py-1 text-sm transition"
     >
-      <Avatar seed={seed} className="size-7 rounded-full" />
+      <Avatar seed={seed} flag={favorite} className="size-7 rounded-full" />
       <span className="hidden sm:inline text-white/60">Salir</span>
     </button>
   );

@@ -23,6 +23,8 @@ import {
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { useUser } from "@/lib/supabase/useUser";
 import { fetchMe, saveMe, fetchResultsRemote } from "@/lib/supabase/data";
+import { logActivity } from "@/lib/supabase/feed";
+import { TEAM_BY_CODE } from "@/data/teams";
 
 const KEY = "mimundial:v1";
 
@@ -79,6 +81,9 @@ export function useAppState() {
   const { user } = useUser();
   const cloud = isSupabaseConfigured && !!user;
   const hydratedRemote = useRef(false);
+  const feedReady = useRef(false);
+  const loggedChamp = useRef<string | null>(null);
+  const loggedLevel = useRef(0);
 
   // Cargar estado + resultados oficiales
   useEffect(() => {
@@ -355,6 +360,39 @@ export function useAppState() {
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state, totalScore, level.level, cloud, user, loaded]);
+
+  // Feed global: registra hitos (campeón, subir de nivel)
+  useEffect(() => {
+    if (!cloud || !user || !hydratedRemote.current) return;
+    if (!feedReady.current) {
+      // baseline: no registrar el estado previo al entrar
+      feedReady.current = true;
+      loggedChamp.current = champ;
+      loggedLevel.current = level.level;
+      return;
+    }
+    if (champ && champ !== loggedChamp.current) {
+      loggedChamp.current = champ;
+      logActivity({
+        userId: user.id,
+        name: state.name,
+        favorite: state.favorite,
+        avatar: state.avatar,
+        text: `coronó a ${TEAM_BY_CODE[champ]?.name ?? "su campeón"} campeón 🏆`,
+      });
+    }
+    if (level.level > loggedLevel.current) {
+      loggedLevel.current = level.level;
+      logActivity({
+        userId: user.id,
+        name: state.name,
+        favorite: state.favorite,
+        avatar: state.avatar,
+        text: `subió a Nivel ${level.level} · ${level.label} ⭐`,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [champ, level.level, cloud, user]);
 
   return {
     state,

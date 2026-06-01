@@ -7,13 +7,16 @@ import {
   requestNotifications,
   showLocal,
 } from "@/lib/notifications";
+import { subscribeToPush, pushReady } from "@/lib/supabase/push";
 
-export default function NotifButton() {
+export default function NotifButton({ userId }: { userId?: string | null }) {
   const [perm, setPerm] = useState<NotificationPermission | "unsupported">("default");
 
   useEffect(() => {
-    setPerm(notifSupported() ? notifPermission() : "unsupported");
-  }, []);
+    const p = notifSupported() ? notifPermission() : "unsupported";
+    setPerm(p);
+    if (p === "granted" && userId && pushReady()) subscribeToPush(userId);
+  }, [userId]);
 
   if (perm === "unsupported") {
     return (
@@ -52,8 +55,10 @@ export default function NotifButton() {
       onClick={async () => {
         const p = await requestNotifications();
         setPerm(p);
-        if (p === "granted")
+        if (p === "granted") {
+          if (userId && pushReady()) subscribeToPush(userId);
           showLocal("Mi Mundial ⚽", "¡Notificaciones activadas! Te avisaremos lo importante.");
+        }
       }}
       className="rounded-full bg-neon text-black font-bold text-sm px-4 py-2 hover:brightness-110 transition"
     >

@@ -18,7 +18,7 @@ import {
   RECENT_USERS,
 } from "@/data/analytics";
 import { TEAM_BY_CODE } from "@/data/teams";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { isSupabaseConfigured, isAdminEmail } from "@/lib/supabase/config";
 import { useUser } from "@/lib/supabase/useUser";
 import { fetchIsAdmin, fetchAdminStats, type AdminStats } from "@/lib/supabase/data";
 import { CrestTile } from "@/components/Brand";
@@ -34,7 +34,12 @@ export default function AdminPage() {
   const [stats, setStats] = useState<AdminStats | null>(null);
 
   useEffect(() => {
-    if (isSupabaseConfigured && user) fetchIsAdmin(user.id).then(setAdminOk);
+    if (!isSupabaseConfigured || !user) return;
+    if (isAdminEmail(user.email)) {
+      setAdminOk(true);
+      return;
+    }
+    fetchIsAdmin(user.id).then(setAdminOk);
   }, [user]);
   useEffect(() => {
     if (adminOk) fetchAdminStats().then(setStats);
@@ -128,7 +133,7 @@ export default function AdminPage() {
 
   return (
     <div className="flex-1">
-      <header className="sticky top-0 z-30 glass border-b border-white/10">
+      <header className="sticky top-0 z-30 glass border-b border-white/10 safe-top">
         <div className="mx-auto max-w-7xl px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <CrestTile className="size-9" />

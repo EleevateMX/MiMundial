@@ -32,21 +32,23 @@ export function avatarSeedFor(avatar: string | null | undefined, fallback: strin
 
 export default function Avatar({
   seed,
+  flag,
   className = "size-10",
 }: {
   seed: string;
+  flag?: string | null;
   className?: string;
 }) {
   const h = hashStr(seed || "mm");
   const [c1, c2] = PAL[h % PAL.length];
-  const head = HEAD[(h >> 3) % HEAD.length];
-  const kit = KIT[(h >> 6) % KIT.length];
-  const kit2 = KIT[(h >> 24) % KIT.length];
-  const face = (h >> 9) % 4;
-  const accessory = (h >> 12) % 6;
-  const isGK = (h >> 15) % 5 === 0; // portero
-  const showNumber = (h >> 18) % 2 === 0;
-  const number = ((h >> 19) % 23) + 1;
+  const head = HEAD[(h >>>3) % HEAD.length];
+  const kit = KIT[(h >>>6) % KIT.length];
+  const kit2 = KIT[(h >>>24) % KIT.length];
+  const face = (h >>>9) % 4;
+  const accessory = (h >>>12) % 6;
+  const isGK = (h >>>15) % 5 === 0; // portero
+  const showNumber = (h >>>18) % 2 === 0;
+  const number = ((h >>>19) % 23) + 1;
   const id = `av${h % 1000000}`;
   const jersey = isGK ? "#1f2a44" : kit;
 
@@ -64,20 +66,49 @@ export default function Avatar({
       <path d="M12 64 q0 -16 20 -16 q20 0 20 16 z" fill={jersey} opacity="0.97" />
       {/* Franja de la playera */}
       <path d="M28 49 q4 -1 8 0 l0 15 -8 0 z" fill={kit2} opacity="0.8" />
-      {/* Número */}
-      {showNumber && (
-        <text
-          x="32"
-          y="61"
-          textAnchor="middle"
-          fontSize="7"
-          fontWeight="bold"
-          fill="#ffffff"
-          opacity="0.85"
-          fontFamily="Arial, sans-serif"
-        >
-          {number}
-        </text>
+      {/* Bandera en la playera (si hay selección favorita) */}
+      {flag ? (
+        <g>
+          <clipPath id={`${id}f`}>
+            <rect x="26" y="52" width="12" height="8.5" rx="1.5" />
+          </clipPath>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <image
+            href={`/flags/${flag}.svg`}
+            x="24.5"
+            y="51"
+            width="15"
+            height="10.5"
+            clipPath={`url(#${id}f)`}
+            preserveAspectRatio="xMidYMid slice"
+          />
+          <rect
+            x="26"
+            y="52"
+            width="12"
+            height="8.5"
+            rx="1.5"
+            fill="none"
+            stroke="#ffffff"
+            strokeOpacity="0.6"
+            strokeWidth="0.7"
+          />
+        </g>
+      ) : (
+        showNumber && (
+          <text
+            x="32"
+            y="61"
+            textAnchor="middle"
+            fontSize="7"
+            fontWeight="bold"
+            fill="#ffffff"
+            opacity="0.85"
+            fontFamily="Arial, sans-serif"
+          >
+            {number}
+          </text>
+        )
       )}
       {/* Guantes de portero */}
       {isGK && (

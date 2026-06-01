@@ -3,9 +3,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { MOCK_LEADERBOARD, TEAMS } from "@/data/teams";
 import { fetchLeaderboard, type LeaderRow } from "@/lib/supabase/data";
+import { fetchFeed, subscribeFeed, type FeedItem } from "@/lib/supabase/feed";
 import Flag from "@/components/Flag";
 import AdSlot from "@/components/AdSlot";
+import Avatar, { avatarSeedFor } from "@/components/Avatar";
 import { SkeletonRows } from "@/components/Skeleton";
+
+const DEMO_FEED = [
+  { name: "Regina_07", favorite: "mx", avatar: "capitan", text: "coronó a México campeón 🏆" },
+  { name: "kevoo", favorite: "br", avatar: "fenomeno", text: "subió a Nivel 5 · Analista ⭐" },
+  { name: "Mariana.G", favorite: "co", avatar: "figura", text: "acertó 8 predicciones seguidas ✅" },
+  { name: "DonPepe", favorite: "es", avatar: "muralla", text: "creó la liga ‘Los Cracks’ 👥" },
+];
 
 type Row = { name: string; pts: number; flag: string; you: boolean; rank: number };
 
@@ -20,6 +29,13 @@ export default function RankingView({
 }) {
   const [remote, setRemote] = useState<LeaderRow[] | null>(null);
   const [loading, setLoading] = useState(true);
+  const [feed, setFeed] = useState<FeedItem[] | null>(null);
+
+  useEffect(() => {
+    fetchFeed(15).then(setFeed);
+    const unsub = subscribeFeed((i) => setFeed((list) => [i, ...(list ?? [])].slice(0, 15)));
+    return unsub;
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -91,6 +107,28 @@ export default function RankingView({
       </div>
 
       <div className="space-y-4">
+        {/* Feed en vivo */}
+        <div className="glass rounded-2xl overflow-hidden">
+          <div className="px-4 py-3 bg-white/5 border-b border-white/10 flex items-center justify-between">
+            <span className="font-display text-lg text-neon">FEED EN VIVO</span>
+            <span className="size-2 rounded-full bg-neon animate-pulse" />
+          </div>
+          <ul className="p-3 space-y-2 max-h-72 overflow-y-auto">
+            {(feed && feed.length > 0 ? feed : DEMO_FEED).map((it, i) => (
+              <li key={"id" in it ? it.id : i} className="flex items-center gap-2.5">
+                <Avatar
+                  seed={avatarSeedFor(it.avatar, it.name)}
+                  flag={it.favorite}
+                  className="size-7 rounded-full shrink-0"
+                />
+                <span className="text-sm text-white/75">
+                  <b className="text-white">{it.name}</b> {it.text}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
         <AdSlot slot="ranking" />
 
         <div className="glass rounded-2xl overflow-hidden h-fit">
