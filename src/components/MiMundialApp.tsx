@@ -8,6 +8,7 @@ import { signOut } from "@/lib/supabase/useUser";
 import Confetti from "@/components/Confetti";
 import Flag from "@/components/Flag";
 import AdSlot from "@/components/AdSlot";
+import BottomNav from "@/components/BottomNav";
 import { CrestTile } from "@/components/Brand";
 import StreakChip from "@/components/StreakChip";
 import ShareModal from "@/components/ShareModal";
@@ -114,7 +115,8 @@ export default function MiMundialApp() {
       />
 
       {/* ===== Content ===== */}
-      <main className="mx-auto w-full max-w-7xl px-4 py-6 flex-1">
+      <main className="mx-auto w-full max-w-7xl px-4 py-6 flex-1 pb-24 sm:pb-6">
+        <div key={tab} className="tab-fade">
         {tab === "grupos" && (
           <GroupsView favorite={app.state.favorite} onPick={app.setFavorite} />
         )}
@@ -172,6 +174,7 @@ export default function MiMundialApp() {
           <ProfileView
             name={app.state.name}
             favorite={app.state.favorite}
+            champ={app.champ}
             level={app.level}
             totalScore={app.totalScore}
             pending={app.pending}
@@ -186,6 +189,7 @@ export default function MiMundialApp() {
             onShare={() => setShowShare(true)}
           />
         )}
+        </div>
       </main>
 
       <div className="mx-auto w-full max-w-7xl px-4 mt-6">
@@ -210,6 +214,18 @@ export default function MiMundialApp() {
           onClose={() => setShowShare(false)}
         />
       )}
+
+      <BottomNav
+        active={tab}
+        onChange={(k) => setTab(k as Tab)}
+        items={[
+          { key: "grupos", label: "Grupos", icon: "🏟️" },
+          { key: "cuadro", label: "Cuadro", icon: "🏆" },
+          { key: "dia", label: "Del día", icon: "📅" },
+          { key: "ligas", label: "Ligas", icon: "👥" },
+          { key: "perfil", label: "Perfil", icon: "👤" },
+        ]}
+      />
     </div>
   );
 }

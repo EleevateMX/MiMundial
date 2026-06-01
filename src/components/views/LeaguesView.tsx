@@ -10,8 +10,10 @@ import {
   type RemoteLeague,
 } from "@/lib/supabase/data";
 import Flag from "@/components/Flag";
+import LeagueChat from "@/components/LeagueChat";
 
 type DisplayLeague = {
+  id: string | null;
   code: string;
   name: string;
   owner: boolean;
@@ -38,6 +40,7 @@ export default function LeaguesView({
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
   const [remote, setRemote] = useState<RemoteLeague[] | null>(null);
+  const [chat, setChat] = useState<DisplayLeague | null>(null);
 
   const refresh = useCallback(() => {
     if (userId) fetchMyLeagues(userId).then(setRemote);
@@ -51,6 +54,7 @@ export default function LeaguesView({
   const display: DisplayLeague[] =
     userId && remote
       ? remote.map((l) => ({
+          id: l.id,
           code: l.code,
           name: l.name,
           owner: l.owner,
@@ -59,6 +63,7 @@ export default function LeaguesView({
             .sort((a, b) => b.score - a.score),
         }))
       : leagues.map((l) => ({
+          id: null,
           code: l.code,
           name: l.name,
           owner: l.owner,
@@ -147,15 +152,25 @@ export default function LeaguesView({
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
           {display.map((l) => (
-            <LeagueCard key={l.code} league={l} />
+            <LeagueCard key={l.code} league={l} onChat={() => setChat(l)} />
           ))}
         </div>
+      )}
+
+      {chat && (
+        <LeagueChat
+          leagueId={chat.id}
+          leagueName={chat.name}
+          me={{ userId, name: myName, favorite }}
+          cloud={!!userId}
+          onClose={() => setChat(null)}
+        />
       )}
     </div>
   );
 }
 
-function LeagueCard({ league }: { league: DisplayLeague }) {
+function LeagueCard({ league, onChat }: { league: DisplayLeague; onChat: () => void }) {
   const [copied, setCopied] = useState(false);
   const rows = league.rows.map((r, i) => ({ ...r, rank: i + 1 }));
 
@@ -168,19 +183,28 @@ function LeagueCard({ league }: { league: DisplayLeague }) {
             {league.owner ? "Eres el admin" : "Miembro"} · {rows.length} jugadores
           </div>
         </div>
-        <button
-          onClick={() => {
-            navigator.clipboard?.writeText(league.code).catch(() => {});
-            setCopied(true);
-            setTimeout(() => setCopied(false), 1500);
-          }}
-          className="shrink-0 rounded-lg border border-gold/40 bg-gold/10 px-3 py-1.5 text-right hover:bg-gold/20 transition"
-        >
-          <div className="text-[9px] uppercase tracking-wider text-white/45">
-            {copied ? "¡Copiado!" : "Código · copiar"}
-          </div>
-          <div className="font-mono font-bold tracking-[0.2em] text-gold">{league.code}</div>
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={onChat}
+            title="Abrir chat"
+            className="rounded-lg border border-neon/40 bg-neon/10 text-neon px-3 py-1.5 text-sm font-semibold hover:bg-neon/20 transition"
+          >
+            💬 Chat
+          </button>
+          <button
+            onClick={() => {
+              navigator.clipboard?.writeText(league.code).catch(() => {});
+              setCopied(true);
+              setTimeout(() => setCopied(false), 1500);
+            }}
+            className="rounded-lg border border-gold/40 bg-gold/10 px-3 py-1.5 text-right hover:bg-gold/20 transition"
+          >
+            <div className="text-[9px] uppercase tracking-wider text-white/45">
+              {copied ? "¡Copiado!" : "Código"}
+            </div>
+            <div className="font-mono font-bold tracking-[0.2em] text-gold">{league.code}</div>
+          </button>
+        </div>
       </div>
       <ul className="divide-y divide-white/5">
         {rows.map((r) => (

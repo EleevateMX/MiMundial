@@ -5,6 +5,7 @@ import { MOCK_LEADERBOARD, TEAMS } from "@/data/teams";
 import { fetchLeaderboard, type LeaderRow } from "@/lib/supabase/data";
 import Flag from "@/components/Flag";
 import AdSlot from "@/components/AdSlot";
+import { SkeletonRows } from "@/components/Skeleton";
 
 type Row = { name: string; pts: number; flag: string; you: boolean; rank: number };
 
@@ -18,9 +19,18 @@ export default function RankingView({
   myName: string;
 }) {
   const [remote, setRemote] = useState<LeaderRow[] | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchLeaderboard(50).then(setRemote);
+    let active = true;
+    fetchLeaderboard(50).then((r) => {
+      if (!active) return;
+      setRemote(r);
+      setLoading(false);
+    });
+    return () => {
+      active = false;
+    };
   }, [score]);
 
   const rows: Row[] = useMemo(() => {
@@ -55,6 +65,9 @@ export default function RankingView({
             {remote && remote.length > 0 ? "real" : "En vivo"}
           </span>
         </div>
+        {loading ? (
+          <SkeletonRows rows={8} />
+        ) : (
         <ul className="divide-y divide-white/5">
           {rows.map((r) => (
             <li
@@ -74,6 +87,7 @@ export default function RankingView({
             </li>
           ))}
         </ul>
+        )}
       </div>
 
       <div className="space-y-4">
