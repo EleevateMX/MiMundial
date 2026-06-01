@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { TEAM_BY_CODE } from "@/data/teams";
 import { type Match, type Round, ROUND_POINTS } from "@/lib/bracket";
 import { isLocked } from "@/lib/schedule";
 import type { PickStatus } from "@/lib/results";
 import Flag from "@/components/Flag";
 import Countdown from "@/components/Countdown";
+import MatchDetailModal from "@/components/MatchDetailModal";
 
 export default function BracketView({
   rounds,
@@ -28,6 +30,11 @@ export default function BracketView({
   onMult: (matchId: string, n: number) => void;
   onShare: () => void;
 }) {
+  const [detail, setDetail] = useState<{ id: string; roundName: string } | null>(null);
+  const liveMatch = detail
+    ? rounds.flatMap((r) => r.matches).find((m) => m.id === detail.id) ?? null
+    : null;
+
   return (
     <div>
       <ChampionBanner champ={champ} favorite={favorite} onShare={onShare} />
@@ -55,6 +62,7 @@ export default function BracketView({
                     status={statuses[m.id]}
                     onPick={onPick}
                     onMult={onMult}
+                    onInfo={() => setDetail({ id: m.id, roundName: r.name })}
                   />
                 ))}
               </div>
@@ -62,6 +70,17 @@ export default function BracketView({
           ))}
         </div>
       </div>
+
+      {liveMatch && detail && (
+        <MatchDetailModal
+          match={liveMatch}
+          roundName={detail.roundName}
+          status={statuses[liveMatch.id]}
+          locked={isLocked(kickoffs[liveMatch.id], Date.now())}
+          onPick={onPick}
+          onClose={() => setDetail(null)}
+        />
+      )}
     </div>
   );
 }
@@ -74,6 +93,7 @@ function MatchCard({
   status,
   onPick,
   onMult,
+  onInfo,
 }: {
   match: Match;
   favorite: string | null;
@@ -82,6 +102,7 @@ function MatchCard({
   status?: PickStatus;
   onPick: (matchId: string, code: string) => void;
   onMult: (matchId: string, n: number) => void;
+  onInfo: () => void;
 }) {
   const locked = isLocked(kickoff, Date.now());
   const hasKickoff = kickoff !== undefined;
@@ -94,25 +115,31 @@ function MatchCard({
         locked ? "opacity-90 ring-1 ring-hot/30" : ""
       }`}
     >
-      {resolved ? (
-        <div className="flex items-center justify-between px-1.5 pt-0.5 text-[10px]">
-          <span className="text-white/35">Resultado</span>
-          {status === "hit" ? (
-            <span className="text-neon font-semibold">✓ Acierto</span>
+      <div className="flex items-center justify-between px-1.5 pt-0.5 text-[10px] gap-1">
+        <span className="text-white/35 truncate">
+          {resolved ? (
+            status === "hit" ? (
+              <span className="text-neon font-semibold">✓ Acierto</span>
+            ) : (
+              <span className="text-hot font-semibold">✗ Fallo</span>
+            )
+          ) : hasKickoff ? (
+            locked ? "🔒 Bloqueado" : "Por jugar"
           ) : (
-            <span className="text-hot font-semibold">✗ Fallo</span>
+            ""
           )}
+        </span>
+        <div className="flex items-center gap-1.5 shrink-0">
+          {!resolved && hasKickoff && <Countdown target={kickoff} className="text-[10px]" />}
+          <button
+            onClick={onInfo}
+            title="Ver detalle"
+            className="text-white/30 hover:text-gold transition leading-none"
+          >
+            ⓘ
+          </button>
         </div>
-      ) : (
-        hasKickoff && (
-          <div className="flex items-center justify-between px-1.5 pt-0.5 text-[10px]">
-            <span className="text-white/35">
-              {locked ? "🔒 Bloqueado" : "Por jugar"}
-            </span>
-            <Countdown target={kickoff} className="text-[10px]" />
-          </div>
-        )
-      )}
+      </div>
 
       <Slot match={match} code={match.a} favorite={favorite} locked={locked} status={status} onPick={onPick} />
       <Slot match={match} code={match.b} favorite={favorite} locked={locked} status={status} onPick={onPick} />

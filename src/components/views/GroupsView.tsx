@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { GROUPS, TEAMS, type Team } from "@/data/teams";
 import Flag from "@/components/Flag";
 
@@ -10,11 +11,41 @@ export default function GroupsView({
   favorite: string | null;
   onPick: (code: string) => void;
 }) {
+  const [q, setQ] = useState("");
+  const query = q.trim().toLowerCase();
+  const groups = GROUPS.map((g) => ({
+    g,
+    teams: TEAMS.filter(
+      (t) => t.group === g && (!query || t.name.toLowerCase().includes(query))
+    ),
+  })).filter((x) => x.teams.length > 0);
+
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {GROUPS.map((g) => {
-        const teams = TEAMS.filter((t) => t.group === g);
-        return (
+    <>
+      <div className="mb-4 relative">
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="🔎 Busca tu selección…"
+          className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-2.5 outline-none focus:border-gold/60 placeholder:text-white/30"
+        />
+        {q && (
+          <button
+            onClick={() => setQ("")}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white"
+          >
+            ✕
+          </button>
+        )}
+      </div>
+
+      {groups.length === 0 ? (
+        <div className="glass rounded-2xl p-8 text-center text-white/45">
+          Ningún equipo coincide con “{q}”. 🤔
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {groups.map(({ g, teams }) => (
           <div key={g} className="glass rounded-2xl overflow-hidden">
             <div className="px-4 py-2.5 flex items-center justify-between bg-white/5 border-b border-white/10">
               <span className="font-display text-lg text-gold">GRUPO {g}</span>
@@ -33,9 +64,10 @@ export default function GroupsView({
               ))}
             </ul>
           </div>
-        );
-      })}
-    </div>
+          ))}
+        </div>
+      )}
+    </>
   );
 }
 
