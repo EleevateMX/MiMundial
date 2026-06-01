@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { buildRounds } from "@/lib/bracket";
 import { loadResults, saveResults, type Results } from "@/lib/results";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { fetchResultsRemote, saveResultsRemote } from "@/lib/supabase/data";
 import { TEAM_BY_CODE } from "@/data/teams";
 import Flag from "@/components/Flag";
 
@@ -10,22 +12,31 @@ export default function ResultsEditor() {
   const [results, setResults] = useState<Results>({});
 
   useEffect(() => {
-    setResults(loadResults());
+    if (isSupabaseConfigured) {
+      fetchResultsRemote().then((r) => setResults(r ?? {}));
+    } else {
+      setResults(loadResults());
+    }
   }, []);
+
+  function persist(next: Results) {
+    if (isSupabaseConfigured) saveResultsRemote(next);
+    else saveResults(next);
+  }
 
   function setWinner(matchId: string, code: string) {
     setResults((prev) => {
       const next = { ...prev };
       if (next[matchId] === code) delete next[matchId];
       else next[matchId] = code;
-      saveResults(next);
+      persist(next);
       return next;
     });
   }
 
   function clearAll() {
     setResults({});
-    saveResults({});
+    persist({});
   }
 
   const rounds = buildRounds(results);

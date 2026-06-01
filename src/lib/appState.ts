@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   buildRounds,
   champion,
@@ -20,6 +20,9 @@ import {
   RESULTS_KEY,
   type Results,
 } from "@/lib/results";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { useUser } from "@/lib/supabase/useUser";
+import { fetchMe, saveMe, fetchResultsRemote } from "@/lib/supabase/data";
 
 const KEY = "mimundial:v1";
 
@@ -71,6 +74,9 @@ export function useAppState() {
   const [loaded, setLoaded] = useState(false);
   const [base] = useState(() => Date.now());
   const [results, setResults] = useState<Results>({});
+  const { user } = useUser();
+  const cloud = isSupabaseConfigured && !!user;
+  const hydratedRemote = useRef(false);
 
   // Cargar estado + resultados oficiales
   useEffect(() => {
@@ -82,7 +88,7 @@ export function useAppState() {
     setLoaded(true);
   }, []);
 
-  // Escuchar cambios de resultados (admin en otra pestaña)
+  // Escuchar cambios de resultados (admin en otra pestaña, modo demo)
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
       if (e.key === RESULTS_KEY || e.key === null) setResults(loadResults());
@@ -90,6 +96,46 @@ export function useAppState() {
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);
   }, []);
+
+  // Nube: al iniciar sesión, traer el cuadro del usuario y los resultados oficiales
+  useEffect(() => {
+    if (!cloud || !user) return;
+    let active = true;
+    (async () => {
+      const remote = await fetchMe(user.id);
+      if (!active) return;
+      // Adoptamos el remoto si tiene contenido; si no, conservamos lo local
+      // (se subirá en el próximo guardado, migrando el progreso de invitado).
+      const hasContent =
+        remote &&
+        (Object.keys(remote.picks).length > 0 ||
+          !!remote.favorite ||
+          remote.streakCount > 0);
+      if (remote && hasContent) {
+        setState((s) => ({
+          ...s,
+          name: remote.name || s.name,
+          favorite: remote.favorite ?? s.favorite,
+          picks: remote.picks,
+          mult: remote.mult,
+          daily: (remote.daily as AppState["daily"]) ?? {},
+          streakCount: remote.streakCount,
+          lastCheckIn: remote.lastCheckIn,
+        }));
+      } else if (remote?.name) {
+        setState((s) => ({
+          ...s,
+          name: s.name === "Invitado" ? remote.name : s.name,
+        }));
+      }
+      const rr = await fetchResultsRemote();
+      if (active && rr) setResults(rr);
+      hydratedRemote.current = true;
+    })();
+    return () => {
+      active = false;
+    };
+  }, [cloud, user]);
 
   // Persistir
   useEffect(() => {
@@ -282,10 +328,32 @@ export function useAppState() {
     ]
   );
 
+  // Nube: guardar cambios del usuario (con pequeño debounce)
+  useEffect(() => {
+    if (!cloud || !user || !loaded || !hydratedRemote.current) return;
+    const t = setTimeout(() => {
+      saveMe(user.id, {
+        name: state.name,
+        favorite: state.favorite,
+        picks: state.picks,
+        mult: state.mult,
+        daily: state.daily,
+        streakCount: state.streakCount,
+        lastCheckIn: state.lastCheckIn,
+        score: totalScore,
+        level: level.level,
+      });
+    }, 800);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state, totalScore, level.level, cloud, user, loaded]);
+
   return {
     state,
     loaded,
     now: base,
+    user,
+    cloud,
     kickoffs,
     results,
     setResults,

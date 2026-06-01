@@ -4,8 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { TEAM_BY_CODE } from "@/data/teams";
 import { useAppState } from "@/lib/appState";
+import { signOut } from "@/lib/supabase/useUser";
 import Confetti from "@/components/Confetti";
 import Flag from "@/components/Flag";
+import AdSlot from "@/components/AdSlot";
 import StreakChip from "@/components/StreakChip";
 import ShareModal from "@/components/ShareModal";
 import RewardToaster from "@/components/RewardToaster";
@@ -80,6 +82,7 @@ export default function MiMundialApp() {
             >
               📣
             </button>
+            <AuthButton user={app.user} name={app.state.name} />
           </div>
         </div>
 
@@ -142,6 +145,8 @@ export default function MiMundialApp() {
             leagues={app.state.leagues}
             score={app.totalScore}
             favorite={app.state.favorite}
+            myName={app.state.name}
+            userId={app.user?.id ?? null}
             onCreate={app.createLeague}
             onJoin={app.joinLeague}
           />
@@ -156,7 +161,11 @@ export default function MiMundialApp() {
         )}
         {tab === "logros" && <AchievementsView unlocked={app.unlocked} />}
         {tab === "ranking" && (
-          <RankingView score={app.totalScore} favorite={app.state.favorite} />
+          <RankingView
+            score={app.totalScore}
+            favorite={app.state.favorite}
+            myName={app.state.name}
+          />
         )}
         {tab === "perfil" && (
           <ProfileView
@@ -178,8 +187,12 @@ export default function MiMundialApp() {
         )}
       </main>
 
-      <footer className="border-t border-white/10 py-6 text-center text-xs text-white/40">
-        Mi Mundial · Solo predicciones, <span className="text-neon">sin apuestas</span> · Prototipo
+      <div className="mx-auto w-full max-w-7xl px-4 mt-6">
+        <AdSlot slot="footer" />
+      </div>
+
+      <footer className="border-t border-white/10 py-6 mt-6 text-center text-xs text-white/40">
+        Mi Mundial · Solo predicciones, <span className="text-neon">sin apuestas</span>
         <span className="mx-2 text-white/20">·</span>
         <Link href="/admin" className="text-white/35 hover:text-gold transition">
           Admin
@@ -217,6 +230,41 @@ function Logo() {
         </div>
       </div>
     </Link>
+  );
+}
+
+function AuthButton({
+  user,
+  name,
+}: {
+  user: { email?: string } | null;
+  name: string;
+}) {
+  if (!user) {
+    return (
+      <Link
+        href="/login"
+        className="rounded-full bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-1.5 text-sm transition whitespace-nowrap"
+      >
+        Entrar
+      </Link>
+    );
+  }
+  const initial = (name || user.email || "?").trim().charAt(0).toUpperCase();
+  return (
+    <button
+      onClick={async () => {
+        await signOut();
+        window.location.href = "/";
+      }}
+      title={`${user.email ?? name} · Cerrar sesión`}
+      className="flex items-center gap-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 pl-1 pr-3 py-1 text-sm transition"
+    >
+      <span className="size-7 rounded-full bg-gradient-to-br from-hot to-gold grid place-items-center text-[11px] font-bold text-black">
+        {initial}
+      </span>
+      <span className="hidden sm:inline text-white/60">Salir</span>
+    </button>
   );
 }
 

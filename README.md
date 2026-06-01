@@ -54,9 +54,25 @@ gana a quién en todo el cuadro y compite en un **ranking global**.
 
 - **Next.js 16** (App Router, TypeScript)
 - **Tailwind CSS v4**
-- Banderas: SVG de [flagcdn.com](https://flagcdn.com)
-- Próximamente: **Supabase** (Auth con Google + correo con confirmación, DB,
-  leaderboard real)
+- **Supabase** (`@supabase/ssr`): Auth (Google + correo con confirmación),
+  Postgres con RLS, ligas/ranking/resultados compartidos y métricas de admin.
+- Banderas: SVG empaquetados localmente (`flag-icons`)
+
+## Modo demo vs. producción
+
+Sin variables de Supabase, la app corre en **modo demo** (todo en
+`localStorage`, ranking/ligas simulados, admin con clave `admin`). Al configurar
+Supabase, pasa a **real**: login, datos en la nube por usuario, ligas/ranking/
+resultados compartidos y admin con rol real + métricas reales.
+
+➡️ **Guía paso a paso:** [`SUPABASE_SETUP.md`](./SUPABASE_SETUP.md) ·
+variables en [`.env.example`](./.env.example) · SQL en
+[`supabase/migrations/0001_init.sql`](./supabase/migrations/0001_init.sql).
+
+### Anuncios
+
+Slots "house" **no invasivos** (banner del footer + tarjeta en el ranking) que
+controlas desde `/admin`. Sin pop-ups ni intersticiales.
 
 ## Desarrollo
 
