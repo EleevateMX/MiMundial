@@ -21,11 +21,14 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGci...
 
 ## 2. Crear el esquema (SQL)
 
-Abre **SQL Editor** en Supabase, pega el contenido de
-`supabase/migrations/0001_init.sql` y ejecútalo. Crea tablas (`profiles`,
-`brackets`, `leagues`, `league_members`, `results`, `ads`), políticas de
-seguridad (RLS), el alta automática de perfil al registrarse, la protección del
-rol y la función de métricas `admin_stats()`.
+Abre **SQL Editor** en Supabase y ejecuta **en orden** los archivos de
+`supabase/migrations/`:
+
+- `0001_init.sql` — tablas (`profiles`, `brackets`, `leagues`, `league_members`,
+  `results`, `ads`), seguridad (RLS), alta automática de perfil, protección de
+  rol y métricas `admin_stats()`.
+- `0002_chat.sql` — tabla `messages` + RLS + Realtime para el **chat por liga**.
+- `0003_avatar.sql` — columna `avatar` (semilla del avatar generado).
 
 ## 3. Login por correo con confirmación (anti-bots)
 

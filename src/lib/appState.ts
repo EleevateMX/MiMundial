@@ -36,6 +36,7 @@ export type DailyPick = {
 
 export type AppState = {
   name: string;
+  avatar: string;
   favorite: string | null;
   picks: Record<string, string>;
   mult: Record<string, number>;
@@ -50,6 +51,7 @@ export type AppState = {
 
 const DEFAULT: AppState = {
   name: "Invitado",
+  avatar: "",
   favorite: null,
   picks: {},
   mult: {},
@@ -115,6 +117,7 @@ export function useAppState() {
         setState((s) => ({
           ...s,
           name: remote.name || s.name,
+          avatar: remote.avatar || s.avatar,
           favorite: remote.favorite ?? s.favorite,
           picks: remote.picks,
           mult: remote.mult,
@@ -150,6 +153,10 @@ export function useAppState() {
   // ----- Acciones -----
   const setName = useCallback(
     (name: string) => setState((s) => ({ ...s, name: name.slice(0, 24) || "Invitado" })),
+    []
+  );
+  const setAvatar = useCallback(
+    (avatar: string) => setState((s) => ({ ...s, avatar })),
     []
   );
   const setFavorite = useCallback(
@@ -334,6 +341,7 @@ export function useAppState() {
     const t = setTimeout(() => {
       saveMe(user.id, {
         name: state.name,
+        avatar: state.avatar,
         favorite: state.favorite,
         picks: state.picks,
         mult: state.mult,
@@ -359,6 +367,7 @@ export function useAppState() {
     setResults,
     // acciones
     setName,
+    setAvatar,
     setFavorite,
     pickWinner,
     setMult,

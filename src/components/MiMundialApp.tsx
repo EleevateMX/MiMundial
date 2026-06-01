@@ -9,6 +9,8 @@ import Confetti from "@/components/Confetti";
 import Flag from "@/components/Flag";
 import AdSlot from "@/components/AdSlot";
 import BottomNav from "@/components/BottomNav";
+import Icon, { type IconName } from "@/components/Icon";
+import Avatar, { avatarSeedFor } from "@/components/Avatar";
 import { CrestTile } from "@/components/Brand";
 import StreakChip from "@/components/StreakChip";
 import ShareModal from "@/components/ShareModal";
@@ -84,7 +86,10 @@ export default function MiMundialApp() {
             >
               📣
             </button>
-            <AuthButton user={app.user} name={app.state.name} />
+            <AuthButton
+              user={app.user}
+              seed={avatarSeedFor(app.state.avatar, app.state.name || app.user?.email || "mm")}
+            />
           </div>
         </div>
 
@@ -94,10 +99,11 @@ export default function MiMundialApp() {
             <button
               key={key}
               onClick={() => setTab(key)}
-              className={`relative px-3 sm:px-4 py-2.5 text-sm font-semibold whitespace-nowrap transition ${
+              className={`relative px-3 sm:px-4 py-2.5 text-sm font-semibold whitespace-nowrap transition flex items-center gap-1.5 ${
                 tab === key ? "text-gold" : "text-white/55 hover:text-white"
               }`}
             >
+              <Icon name={key as IconName} className="size-4" />
               {label}
               {tab === key && (
                 <span className="absolute left-2 right-2 -bottom-px h-0.5 rounded-full bg-gold glow-gold" />
@@ -173,6 +179,7 @@ export default function MiMundialApp() {
         {tab === "perfil" && (
           <ProfileView
             name={app.state.name}
+            avatar={app.state.avatar}
             favorite={app.state.favorite}
             champ={app.champ}
             level={app.level}
@@ -186,6 +193,7 @@ export default function MiMundialApp() {
             duelsCount={app.state.duels.length}
             unlocked={app.unlocked}
             onName={app.setName}
+            onAvatar={app.setAvatar}
             onShare={() => setShowShare(true)}
           />
         )}
@@ -219,11 +227,11 @@ export default function MiMundialApp() {
         active={tab}
         onChange={(k) => setTab(k as Tab)}
         items={[
-          { key: "grupos", label: "Grupos", icon: "🏟️" },
-          { key: "cuadro", label: "Cuadro", icon: "🏆" },
-          { key: "dia", label: "Del día", icon: "📅" },
-          { key: "ligas", label: "Ligas", icon: "👥" },
-          { key: "perfil", label: "Perfil", icon: "👤" },
+          { key: "grupos", label: "Grupos", icon: "grupos" },
+          { key: "cuadro", label: "Cuadro", icon: "cuadro" },
+          { key: "dia", label: "Del día", icon: "dia" },
+          { key: "ligas", label: "Ligas", icon: "ligas" },
+          { key: "perfil", label: "Perfil", icon: "perfil" },
         ]}
       />
     </div>
@@ -250,10 +258,10 @@ function Logo() {
 
 function AuthButton({
   user,
-  name,
+  seed,
 }: {
   user: { email?: string } | null;
-  name: string;
+  seed: string;
 }) {
   if (!user) {
     return (
@@ -265,19 +273,16 @@ function AuthButton({
       </Link>
     );
   }
-  const initial = (name || user.email || "?").trim().charAt(0).toUpperCase();
   return (
     <button
       onClick={async () => {
         await signOut();
         window.location.href = "/";
       }}
-      title={`${user.email ?? name} · Cerrar sesión`}
+      title={`${user.email ?? ""} · Cerrar sesión`}
       className="flex items-center gap-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 pl-1 pr-3 py-1 text-sm transition"
     >
-      <span className="size-7 rounded-full bg-gradient-to-br from-hot to-gold grid place-items-center text-[11px] font-bold text-black">
-        {initial}
-      </span>
+      <Avatar seed={seed} className="size-7 rounded-full" />
       <span className="hidden sm:inline text-white/60">Salir</span>
     </button>
   );
