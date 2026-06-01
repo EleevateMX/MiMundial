@@ -1,12 +1,14 @@
 "use client";
 
+import Icon, { type IconName } from "@/components/Icon";
+
 // Barra de navegación inferior (solo móvil) estilo app nativa.
 export default function BottomNav({
   items,
   active,
   onChange,
 }: {
-  items: { key: string; label: string; icon: string }[];
+  items: { key: string; label: string; icon: IconName }[];
   active: string;
   onChange: (key: string) => void;
 }) {
@@ -24,9 +26,7 @@ export default function BottomNav({
               }`}
             >
               {on && <span className="absolute top-0 h-0.5 w-8 rounded-full bg-gold glow-gold" />}
-              <span className={`text-xl leading-none transition-transform ${on ? "scale-110" : ""}`}>
-                {it.icon}
-              </span>
+              <Icon name={it.icon} className={`size-6 transition-transform ${on ? "scale-110" : ""}`} />
               <span className="text-[10px] font-semibold">{it.label}</span>
             </button>
           );

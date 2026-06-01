@@ -5,9 +5,16 @@ import { ACHIEVEMENTS } from "@/lib/achievements";
 import type { LevelInfo } from "@/lib/levels";
 import { buildActivity } from "@/lib/activity";
 import Flag from "@/components/Flag";
+import Avatar, { avatarSeedFor } from "@/components/Avatar";
+
+const AVATAR_SEEDS = [
+  "balon", "goleador", "crack", "mundial", "capitan", "figura",
+  "fiera", "leyenda", "tridente", "muralla", "torpedo", "fenomeno",
+];
 
 export default function ProfileView({
   name,
+  avatar,
   favorite,
   champ,
   level,
@@ -21,9 +28,11 @@ export default function ProfileView({
   duelsCount,
   unlocked,
   onName,
+  onAvatar,
   onShare,
 }: {
   name: string;
+  avatar: string;
   favorite: string | null;
   champ: string | null;
   level: LevelInfo;
@@ -37,8 +46,10 @@ export default function ProfileView({
   duelsCount: number;
   unlocked: Set<string>;
   onName: (v: string) => void;
+  onAvatar: (seed: string) => void;
   onShare: () => void;
 }) {
+  const seed = avatarSeedFor(avatar, name);
   const activity = buildActivity({
     name,
     champ,
@@ -49,7 +60,6 @@ export default function ProfileView({
     medals: unlocked.size,
   });
   const fav = favorite ? TEAM_BY_CODE[favorite] : null;
-  const initial = (name || "?").trim().charAt(0).toUpperCase();
 
   const stats = [
     ["Picks", `${made}/31`],
@@ -77,9 +87,7 @@ export default function ProfileView({
 
         <div className="px-5 pb-5 -mt-12 relative flex items-end gap-4">
           <div className="relative shrink-0">
-            <div className="size-20 rounded-2xl bg-[#0a0e1c] grid place-items-center text-3xl font-display text-gold-gradient border border-white/15 shadow-lg">
-              {initial}
-            </div>
+            <Avatar seed={seed} className="size-20 rounded-2xl border border-white/15 shadow-lg" />
             {fav && (
               <Flag
                 code={fav.code}
@@ -135,6 +143,35 @@ export default function ProfileView({
               <span className="text-gold">+{pending}</span> en juego por resolver
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Selector de avatar */}
+      <div className="glass rounded-2xl p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-display text-lg text-gold">ELIGE TU AVATAR</h3>
+          <button
+            onClick={() => onAvatar(`r${Math.floor(Math.random() * 1e9).toString(36)}`)}
+            className="text-xs rounded-full border border-neon/40 bg-neon/10 text-neon px-3 py-1.5 hover:bg-neon/20 transition"
+          >
+            🎲 Aleatorio
+          </button>
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {AVATAR_SEEDS.map((s) => {
+            const active = seed === s;
+            return (
+              <button
+                key={s}
+                onClick={() => onAvatar(s)}
+                className={`shrink-0 rounded-xl transition ${
+                  active ? "ring-2 ring-gold glow-gold" : "opacity-80 hover:opacity-100"
+                }`}
+              >
+                <Avatar seed={s} className="size-12 rounded-xl" />
+              </button>
+            );
+          })}
         </div>
       </div>
 

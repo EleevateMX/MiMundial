@@ -5,6 +5,7 @@ import { randomCode } from "@/data/social";
 
 export type RemoteUserData = {
   name: string;
+  avatar: string;
   favorite: string | null;
   role: string;
   picks: Record<string, string>;
@@ -26,6 +27,7 @@ export async function fetchMe(userId: string): Promise<RemoteUserData | null> {
   if (!profile && !bracket) return null;
   return {
     name: profile?.display_name ?? "Jugador",
+    avatar: profile?.avatar ?? "",
     favorite: profile?.favorite ?? null,
     role: profile?.role ?? "user",
     picks: bracket?.picks ?? {},
@@ -40,6 +42,7 @@ export async function saveMe(
   userId: string,
   data: {
     name: string;
+    avatar: string;
     favorite: string | null;
     picks: Record<string, string>;
     mult: Record<string, number>;
@@ -56,6 +59,7 @@ export async function saveMe(
     sb.from("profiles").upsert({
       id: userId,
       display_name: data.name,
+      avatar: data.avatar,
       favorite: data.favorite,
       score: data.score,
       level: data.level,
