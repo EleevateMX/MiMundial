@@ -1,8 +1,8 @@
 <!--
-  Mi Mundial — "Confirm signup"
-  Supabase → Authentication → Email Templates → Confirm sign up
-  Asunto: Confirma tu cuenta en Mi Mundial ⚽
-  Variable: {{ .ConfirmationURL }}
+  Mi Mundial — "Change Email Address"
+  Supabase → Authentication → Email Templates → Change email address
+  Asunto: Confirma tu nuevo correo en Mi Mundial ⚽
+  Variables: {{ .ConfirmationURL }}, {{ .Email }}, {{ .NewEmail }}
 -->
 <!DOCTYPE html>
 <html lang="es">
@@ -19,12 +19,12 @@
             <tr>
               <td style="padding:30px 26px;text-align:center;">
                 <div style="font-size:13px;letter-spacing:3px;color:#2bf5c0;text-transform:uppercase;">⚽ Mi Mundial</div>
-                <h1 style="margin:10px 0 0;font-size:26px;line-height:1.2;color:#ffd24a;">Confirma tu cuenta</h1>
-                <p style="color:#c9cede;font-size:15px;line-height:1.55;margin:14px 0 26px;">
-                  ¡Bienvenido a <strong>Mi Mundial</strong>! Confirma tu correo para
-                  guardar tu cuadro, armar tus predicciones y entrar al ranking.
+                <h1 style="margin:10px 0 0;font-size:26px;line-height:1.2;color:#ffd24a;">Confirma tu nuevo correo</h1>
+                <p style="color:#c9cede;font-size:15px;line-height:1.55;margin:14px 0 24px;">
+                  Pediste cambiar tu correo a <strong style="color:#f5f7ff;">{{ .NewEmail }}</strong>.
+                  Confirma para aplicar el cambio en tu cuenta de <strong>Mi Mundial</strong>.
                 </p>
-                <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#ffd24a;color:#0b0e17;font-weight:bold;text-decoration:none;padding:15px 30px;border-radius:999px;font-size:16px;">Confirmar mi correo</a>
+                <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#ffd24a;color:#0b0e17;font-weight:bold;text-decoration:none;padding:15px 30px;border-radius:999px;font-size:16px;">Confirmar nuevo correo</a>
                 <p style="color:#8a90a6;font-size:12px;margin:24px 0 0;line-height:1.5;">
                   Si el botón no funciona, copia y pega este enlace:<br />
                   <a href="{{ .ConfirmationURL }}" style="color:#ffd24a;word-break:break-all;">{{ .ConfirmationURL }}</a>
@@ -35,7 +35,7 @@
               <td style="padding:16px;text-align:center;border-top:1px solid rgba(255,255,255,0.08);">
                 <p style="color:#6b7180;font-size:11px;margin:0;line-height:1.5;">
                   Mi Mundial · Solo predicciones, sin apuestas.<br />
-                  Si no creaste esta cuenta, ignora este correo.
+                  Si no pediste este cambio, ignora este correo.
                 </p>
               </td>
             </tr>
