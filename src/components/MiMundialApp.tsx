@@ -21,7 +21,7 @@ import RankingView from "@/components/views/RankingView";
 import LeaguesView from "@/components/views/LeaguesView";
 import DuelView from "@/components/views/DuelView";
 import AchievementsView from "@/components/views/AchievementsView";
-import DailyView from "@/components/views/DailyView";
+import CalendarView from "@/components/views/CalendarView";
 import ProfileView from "@/components/views/ProfileView";
 
 type Tab =
@@ -37,7 +37,7 @@ type Tab =
 const TABS: [Tab, string][] = [
   ["grupos", "Grupos"],
   ["cuadro", "Mi Cuadro"],
-  ["dia", "Del día"],
+  ["dia", "Calendario"],
   ["ligas", "Ligas"],
   ["duelo", "Duelo"],
   ["logros", "Logros"],
@@ -138,11 +138,9 @@ export default function MiMundialApp() {
           />
         )}
         {tab === "dia" && (
-          <DailyView
-            kickoffs={app.kickoffs}
+          <CalendarView
             now={app.now}
             daily={app.state.daily}
-            results={app.results}
             onWinner={app.setDailyWinner}
             onScore={app.setDailyScore}
           />
@@ -229,7 +227,7 @@ export default function MiMundialApp() {
         items={[
           { key: "grupos", label: "Grupos", icon: "grupos" },
           { key: "cuadro", label: "Cuadro", icon: "cuadro" },
-          { key: "dia", label: "Del día", icon: "dia" },
+          { key: "dia", label: "Calendario", icon: "dia" },
           { key: "ligas", label: "Ligas", icon: "ligas" },
           { key: "perfil", label: "Perfil", icon: "perfil" },
         ]}

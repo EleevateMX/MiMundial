@@ -181,7 +181,7 @@ export function useAppState() {
   }, []);
 
   const setDailyWinner = useCallback(
-    (matchId: string, code: string) => {
+    (matchId: string, code: string, kickoff: number) => {
       setState((s) => {
         const prev = s.daily[matchId];
         if (prev?.winner === code) {
@@ -189,7 +189,7 @@ export function useAppState() {
           delete daily[matchId];
           return { ...s, daily };
         }
-        const bonus = earlyBonus(kickoffs[matchId], base);
+        const bonus = earlyBonus(kickoff, base);
         return {
           ...s,
           daily: {
@@ -204,7 +204,7 @@ export function useAppState() {
         };
       });
     },
-    [kickoffs, base]
+    [base]
   );
   const setDailyScore = useCallback(
     (matchId: string, gf: number | null, gc: number | null) => {
